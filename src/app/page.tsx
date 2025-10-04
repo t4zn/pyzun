@@ -214,6 +214,49 @@ export default function Home() {
   const [language, setLanguage] = useState('python');
   const [code, setCode] = useState(defaultCode.python);
   const [stdin, setStdin] = useState('');
+  const getDefaultFilename = (lang: string) => {
+    const defaults: Record<string, string> = {
+      assembly: 'main.asm',
+      bash: 'script.sh',
+      basic: 'main.bas',
+      c: 'main.c',
+      cpp: 'main.cpp',
+      csharp: 'Program.cs',
+      clojure: 'main.clj',
+      cobol: 'main.cob',
+      d: 'main.d',
+      elixir: 'main.ex',
+      erlang: 'main.erl',
+      fortran: 'main.f90',
+      go: 'main.go',
+      haskell: 'main.hs',
+      java: 'Main.java',
+      javascript: 'script.js',
+      kotlin: 'Main.kt',
+      lisp: 'main.lisp',
+      lua: 'main.lua',
+      objective_c: 'main.m',
+      ocaml: 'main.ml',
+      octave: 'main.m',
+      pascal: 'main.pas',
+      perl: 'script.pl',
+      php: 'index.php',
+      prolog: 'main.pl',
+      python: 'main.py',
+      r: 'script.r',
+      ruby: 'main.rb',
+      rust: 'main.rs',
+      scala: 'Main.scala',
+      sql: 'query.sql',
+      swift: 'main.swift',
+      typescript: 'script.ts',
+      visual_basic: 'Main.vb'
+    };
+    return defaults[lang] || 'main.txt';
+  };
+
+  const [filename, setFilename] = useState(getDefaultFilename('python'));
+  const [isEditingFilename, setIsEditingFilename] = useState(false);
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [executionStats, setExecutionStats] = useState<{
@@ -230,13 +273,16 @@ export default function Home() {
     setOutput('');
     setError('');
     setExecutionStats({ time: null, memory: null });
+
+    // Update filename to default for the new language
+    setFilename(getDefaultFilename(newLanguage));
   };
 
   const handleRunCode = async () => {
     setOutput('');
     setError('');
     setExecutionStats({ time: null, memory: null });
-    
+
     const result = await executeCode(code, language, stdin);
     setOutput(result.output);
     setError(result.error);
@@ -308,19 +354,16 @@ export default function Home() {
   };
 
   const handleDownloadCode = () => {
-    const extension = getFileExtension(language);
-    const filename = `code.${extension}`;
-    
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
-    link.download = filename;
+    link.download = filename; // Use the current filename from state
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     URL.revokeObjectURL(url);
   };
 
@@ -338,7 +381,7 @@ export default function Home() {
             <button
               onClick={toggleTheme}
               className="p-3 transition-all duration-200"
-              style={{ 
+              style={{
                 color: 'var(--foreground)'
               }}
               onMouseEnter={(e) => {
@@ -449,6 +492,54 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+              {/* Minimal File Header */}
+              <div className="mb-2">
+                <div
+                  className="inline-flex items-center gap-2 px-2 py-1 rounded-md"
+                  style={{
+                    backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
+                    border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
+                  }}
+                >
+                  {isEditingFilename ? (
+                    <input
+                      type="text"
+                      value={filename}
+                      onChange={(e) => setFilename(e.target.value)}
+                      onBlur={() => setIsEditingFilename(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setIsEditingFilename(false);
+                        }
+                      }}
+                      className="bg-transparent text-xs font-medium outline-none min-w-0"
+                      style={{ color: 'var(--foreground)' }}
+                      autoFocus
+                    />
+                  ) : (
+                    <div
+                      className="flex items-center gap-1 group cursor-pointer"
+                      onClick={() => setIsEditingFilename(true)}
+                    >
+                      <span className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>
+                        {filename}
+                      </span>
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="opacity-0 group-hover:opacity-60 transition-opacity"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="flex-1 min-h-[300px]">
                 <CodeEditor
                   value={code}
@@ -465,9 +556,9 @@ export default function Home() {
           rightPanel={
             <div className="h-full flex flex-col p-8 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
               <div className="flex-1 min-h-[300px]">
-                <Output 
-                  output={output} 
-                  error={error} 
+                <Output
+                  output={output}
+                  error={error}
                   isLoading={isLoading}
                   executionTime={executionStats.time}
                   memoryUsed={executionStats.memory}
