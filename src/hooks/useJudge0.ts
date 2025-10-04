@@ -69,6 +69,10 @@ export function useJudge0() {
       for (let keyAttempt = 0; keyAttempt < maxKeyAttempts; keyAttempt++) {
         const apiKey = getCurrentApiKey();
         
+        if (!apiKey) {
+          throw new Error('No API key available');
+        }
+        
         try {
           // Submit code for execution
           const submitResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=false', {
