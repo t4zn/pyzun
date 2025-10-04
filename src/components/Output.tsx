@@ -72,8 +72,8 @@ export default function Output({
       </div>
       
       <div className="flex-1 flex flex-col p-6 font-mono text-sm leading-relaxed" style={{ backgroundColor: 'var(--background)' }}>
-        {/* Input Section - Only show if code needs input */}
-        {onStdinChange && needsInput && (
+        {/* Input Section - Always show if onStdinChange is provided */}
+        {onStdinChange && (
           <div className="mb-4">
             <label className="block text-xs font-medium mb-2 opacity-70" style={{ color: 'var(--foreground)' }}>
               Input for the program (optional):
