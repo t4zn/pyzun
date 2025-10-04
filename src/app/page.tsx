@@ -430,10 +430,13 @@ export default function Home() {
                     aria-label={isLoading ? 'Running code...' : 'Run code'}
                   >
                     {isLoading ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
-                        <circle cx="12" cy="12" r="10" opacity="0.3"/>
-                        <path d="M12 6v6l4 2" opacity="0.7"/>
-                      </svg>
+                      <div className="flex items-center justify-center w-5 h-5">
+                        <span className="inline-flex">
+                          <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></span>
+                          <span className="w-1 h-1 bg-current rounded-full animate-pulse mx-0.5" style={{ animationDelay: '200ms' }}></span>
+                          <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></span>
+                        </span>
+                      </div>
                     ) : (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
                         <polygon points="5,3 19,12 5,21" />

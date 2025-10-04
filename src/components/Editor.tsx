@@ -4,6 +4,7 @@ import { Editor } from '@monaco-editor/react';
 import { useTheme } from './ThemeProvider';
 import { useEffect, useRef, useCallback } from 'react';
 import * as monaco from 'monaco-editor';
+import { SparkIcon } from './SparkIcon';
 
 interface EditorProps {
   value: string;
@@ -66,8 +67,14 @@ export default function CodeEditor({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof monaco | null>(null);
 
+  const decorationIds = useRef<string[]>([]);
+
   const applyDiffDecorations = useCallback(() => {
     if (!editorRef.current || !monacoRef.current || !showDiff || !suggestedCode || !value) {
+      // Clear decorations if no diff to show
+      if (editorRef.current && decorationIds.current.length > 0) {
+        decorationIds.current = editorRef.current.deltaDecorations(decorationIds.current, []);
+      }
       return;
     }
 
@@ -75,47 +82,42 @@ export default function CodeEditor({
     const suggestedLines = suggestedCode.split('\n');
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
     
-    // Show suggested code with highlighting for changes
+    // Since we're showing the suggested code in the editor, we highlight the changes
+    // We'll use green for lines that were changed/added
     for (let i = 0; i < suggestedLines.length; i++) {
       const originalLine = originalLines[i];
       const suggestedLine = suggestedLines[i];
       
       if (originalLine !== suggestedLine) {
-        const isAdded = originalLine === undefined;
-        const isModified = originalLine !== undefined && suggestedLine !== undefined;
+        // Line was changed, added, or modified
+        decorations.push({
+          range: new monacoRef.current.Range(i + 1, 1, i + 1, 1),
+          options: {
+            isWholeLine: true,
+            className: 'diff-added-line',
+            overviewRuler: {
+              color: '#22c55e',
+              position: monacoRef.current.editor.OverviewRulerLane.Left
+            },
+            minimap: {
+              color: '#22c55e',
+              position: monacoRef.current.editor.MinimapPosition.Inline
+            }
+          }
+        });
         
-        if (isAdded || isModified) {
-
-          
-          decorations.push({
-            range: new monacoRef.current.Range(i + 1, 1, i + 1, 1),
-            options: {
-              isWholeLine: true,
-              className: 'diff-highlight-line',
-              overviewRuler: {
-                color: '#22c55e',
-                position: monacoRef.current.editor.OverviewRulerLane.Left
-              },
-              minimap: {
-                color: '#22c55e',
-                position: monacoRef.current.editor.MinimapPosition.Inline
-              }
-            }
-          });
-          
-          // Add inline decoration for the entire line
-          decorations.push({
-            range: new monacoRef.current.Range(i + 1, 1, i + 1, suggestedLine.length + 1),
-            options: {
-              inlineClassName: 'diff-inline-highlight',
-              stickiness: monacoRef.current.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
-            }
-          });
-        }
+        // Add a subtle glow effect for better visibility
+        decorations.push({
+          range: new monacoRef.current.Range(i + 1, 1, i + 1, suggestedLine.length + 1),
+          options: {
+            inlineClassName: 'diff-inline-added',
+            stickiness: monacoRef.current.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
+          }
+        });
       }
     }
     
-    editorRef.current.deltaDecorations([], decorations);
+    decorationIds.current = editorRef.current.deltaDecorations(decorationIds.current, decorations);
   }, [showDiff, suggestedCode, value]);
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => {
@@ -128,23 +130,40 @@ export default function CodeEditor({
     applyDiffDecorations();
   }, [showDiff, suggestedCode, value, applyDiffDecorations]);
 
+  // Clear decorations when component unmounts or diff is hidden
+  useEffect(() => {
+    return () => {
+      if (editorRef.current && decorationIds.current.length > 0) {
+        decorationIds.current = editorRef.current.deltaDecorations(decorationIds.current, []);
+      }
+    };
+  }, [showDiff]);
+
   return (
     <div className="h-full overflow-hidden relative">
       {showDiff && suggestedCode && (
-        <div className="absolute top-3 right-3 z-10 flex gap-1">
+        <div className="absolute top-3 right-3 z-10 flex gap-2">
           <button
             onClick={onApplyDiff}
-            className="w-6 h-6 bg-green-500 hover:bg-green-600 text-white text-xs rounded flex items-center justify-center transition-colors"
+            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded-md font-medium transition-colors shadow-sm"
+            style={{ 
+              backgroundColor: theme === 'dark' ? '#000000' : '#ffffff', 
+              color: theme === 'dark' ? '#ffffff' : '#000000', 
+              border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb' 
+            }}
             title="Apply changes"
           >
-            ✓
+            <SparkIcon size={12} />
+            Apply
           </button>
           <button
             onClick={onRejectDiff}
-            className="w-6 h-6 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded flex items-center justify-center transition-colors"
+            className="flex items-center justify-center p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
             title="Reject changes"
           >
-            ✕
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
         </div>
       )}

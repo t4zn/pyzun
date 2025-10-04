@@ -32,7 +32,9 @@ export function useAICodeFix() {
   };
 
   const rejectFix = (onReject: (code: string) => void) => {
-    onReject(originalCode);
+    if (originalCode) {
+      onReject(originalCode);
+    }
     closeDiff();
   };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { SparkIcon } from './SparkIcon';
+import { useTheme } from './ThemeProvider';
 
 interface OutputProps {
   output: string;
@@ -58,34 +59,37 @@ export default function Output({
         {/* Output Content */}
         <div className="flex-1 overflow-auto">
           {isLoading ? (
-            <div style={{ color: 'var(--foreground)' }} className="animate-pulse">
-              Running code...
+            <div style={{ color: 'var(--foreground)' }} className="flex items-center gap-1">
+              Running code
+              <span className="inline-flex">
+                <span className="animate-pulse" style={{ animationDelay: '0ms' }}>.</span>
+                <span className="animate-pulse" style={{ animationDelay: '200ms' }}>.</span>
+                <span className="animate-pulse" style={{ animationDelay: '400ms' }}>.</span>
+              </span>
             </div>
           ) : (
             <>
               {error ? (
                 <div className="animate-fade-in">
-                  <div className="flex items-start gap-3 mb-2">
-                    <div style={{ color: 'var(--foreground)' }} className="whitespace-pre-wrap flex-1">
-                      {error}
-                    </div>
-                    {onAIFix && (
-                      <button
-                        onClick={onAIFix}
-                        disabled={isFixingCode}
-                        className="group flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-gray-900 to-black dark:from-white dark:to-gray-100 text-white dark:text-black rounded-lg hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 border border-gray-700 dark:border-gray-300"
-                        title="Fix code with AI"
-                        style={{ fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                      >
-                        <div className="group-hover:rotate-12 transition-transform duration-200">
-                          <SparkIcon size={12} />
-                        </div>
-                        <span className="text-xs font-semibold tracking-wide">
-                          {isFixingCode ? 'Fixing...' : 'AI Fix'}
-                        </span>
-                      </button>
-                    )}
+                  <div style={{ color: 'var(--foreground)' }} className="whitespace-pre-wrap mb-3">
+                    {error}
                   </div>
+                  {onAIFix && (
+                    <span
+                      onClick={onAIFix}
+                      className="group inline-flex items-center gap-1.5 cursor-pointer hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200 text-xs font-semibold tracking-wide"
+                      style={{ 
+                        color: 'var(--foreground)', 
+                        fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' 
+                      }}
+                      title="Fix code with AI"
+                    >
+                      <div className="group-hover:rotate-12 transition-transform duration-200">
+                        <SparkIcon size={12} />
+                      </div>
+                      {isFixingCode ? 'Fixing...' : 'AI Fix'}
+                    </span>
+                  )}
                 </div>
               ) : output ? (
                 <div style={{ color: 'var(--foreground)' }} className="whitespace-pre-wrap animate-fade-in">
