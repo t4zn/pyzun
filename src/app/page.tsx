@@ -328,7 +328,10 @@ export default function Home() {
       {/* Header */}
       <header className="px-8 py-6" style={{ backgroundColor: 'var(--background)' }}>
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-light tracking-wide" style={{ color: 'var(--foreground)' }}>Pyzun</h1>
+          <div className="flex items-center gap-3">
+            <img src="/pyzun.svg" alt="Pyzun" className="w-8 h-8" />
+            <h1 className="text-3xl font-light tracking-wide" style={{ color: 'var(--foreground)' }}>Pyzun</h1>
+          </div>
           <div className="flex items-center gap-6">
             <LanguageSelector language={language} onChange={handleLanguageChange} />
             <button
