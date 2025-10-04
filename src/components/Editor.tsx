@@ -2,12 +2,17 @@
 
 import { Editor } from '@monaco-editor/react';
 import { useTheme } from './ThemeProvider';
+import { useEffect, useRef, useCallback } from 'react';
 import * as monaco from 'monaco-editor';
 
 interface EditorProps {
   value: string;
   onChange: (value: string | undefined) => void;
   language: string;
+  suggestedCode?: string;
+  showDiff?: boolean;
+  onApplyDiff?: () => void;
+  onRejectDiff?: () => void;
 }
 
 const languageMap: Record<string, string> = {
@@ -48,16 +53,131 @@ const languageMap: Record<string, string> = {
   'visual_basic': 'vb'
 };
 
-export default function CodeEditor({ value, onChange, language }: EditorProps) {
+export default function CodeEditor({ 
+  value, 
+  onChange, 
+  language, 
+  suggestedCode, 
+  showDiff, 
+  onApplyDiff, 
+  onRejectDiff 
+}: EditorProps) {
   const { theme } = useTheme();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<typeof monaco | null>(null);
+
+  const applyDiffDecorations = useCallback(() => {
+    if (!editorRef.current || !monacoRef.current || !showDiff || !suggestedCode || !value) {
+      return;
+    }
+
+    const originalLines = value.split('\n');
+    const suggestedLines = suggestedCode.split('\n');
+    const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+    
+    // Show suggested code with highlighting for changes
+    for (let i = 0; i < suggestedLines.length; i++) {
+      const originalLine = originalLines[i];
+      const suggestedLine = suggestedLines[i];
+      
+      if (originalLine !== suggestedLine) {
+        const isAdded = originalLine === undefined;
+        const isModified = originalLine !== undefined && suggestedLine !== undefined;
+        
+        if (isAdded || isModified) {
+
+          
+          decorations.push({
+            range: new monacoRef.current.Range(i + 1, 1, i + 1, 1),
+            options: {
+              isWholeLine: true,
+              className: 'diff-highlight-line',
+              overviewRuler: {
+                color: '#22c55e',
+                position: monacoRef.current.editor.OverviewRulerLane.Left
+              },
+              minimap: {
+                color: '#22c55e',
+                position: monacoRef.current.editor.MinimapPosition.Inline
+              }
+            }
+          });
+          
+          // Add inline decoration for the entire line
+          decorations.push({
+            range: new monacoRef.current.Range(i + 1, 1, i + 1, suggestedLine.length + 1),
+            options: {
+              inlineClassName: 'diff-inline-highlight',
+              stickiness: monacoRef.current.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
+            }
+          });
+        }
+      }
+    }
+    
+    editorRef.current.deltaDecorations([], decorations);
+  }, [showDiff, suggestedCode, value]);
+
+  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => {
+    editorRef.current = editor;
+    monacoRef.current = monacoInstance;
+    applyDiffDecorations();
+  };
+
+  useEffect(() => {
+    applyDiffDecorations();
+  }, [showDiff, suggestedCode, value, applyDiffDecorations]);
 
   return (
-    <div className="h-full overflow-hidden">
+    <div className="h-full overflow-hidden relative">
+      {showDiff && suggestedCode && (
+        <div className="absolute top-3 right-3 z-10 flex gap-1">
+          <button
+            onClick={onApplyDiff}
+            className="w-6 h-6 bg-green-500 hover:bg-green-600 text-white text-xs rounded flex items-center justify-center transition-colors"
+            title="Apply changes"
+          >
+            ✓
+          </button>
+          <button
+            onClick={onRejectDiff}
+            className="w-6 h-6 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded flex items-center justify-center transition-colors"
+            title="Reject changes"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <Editor
         height="100%"
         language={languageMap[language] || 'python'}
-        value={value}
+        value={showDiff && suggestedCode ? suggestedCode : value}
         onChange={onChange}
+        onMount={(editor, monaco) => {
+          handleEditorDidMount(editor, monaco);
+          
+          // Ensure all features are enabled after mount
+          editor.updateOptions({
+            quickSuggestions: {
+              other: true,
+              comments: true,
+              strings: true
+            },
+            suggestOnTriggerCharacters: true,
+            acceptSuggestionOnCommitCharacter: true,
+            acceptSuggestionOnEnter: 'on'
+          });
+
+          // Add keyboard shortcuts for common actions
+          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
+            editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+          });
+
+          // Force suggestions to show on Ctrl+Space
+          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Space, () => {
+            editor.trigger('keyboard', 'editor.action.triggerParameterHints', {});
+          });
+        }}
         theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
         options={{
           // Basic editor options
@@ -416,29 +536,6 @@ export default function CodeEditor({ value, onChange, language }: EditorProps) {
                 end: new RegExp('^\\s*#endregion\\b')
               }
             }
-          });
-        }}
-        onMount={(editor, monaco) => {
-          // Ensure all features are enabled after mount
-          editor.updateOptions({
-            quickSuggestions: {
-              other: true,
-              comments: true,
-              strings: true
-            },
-            suggestOnTriggerCharacters: true,
-            acceptSuggestionOnCommitCharacter: true,
-            acceptSuggestionOnEnter: 'on'
-          });
-
-          // Add keyboard shortcuts for common actions
-          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
-            editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
-          });
-
-          // Force suggestions to show on Ctrl+Space
-          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Space, () => {
-            editor.trigger('keyboard', 'editor.action.triggerParameterHints', {});
           });
         }}
       />

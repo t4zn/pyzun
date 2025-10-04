@@ -5,7 +5,9 @@ import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
 import LanguageSelector from '../components/LanguageSelector';
 import ResizablePanels from '../components/ResizablePanels';
+
 import { useJudge0 } from '../hooks/useJudge0';
+import { useAICodeFix } from '../hooks/useAICodeFix';
 import { useTheme } from '../components/ThemeProvider';
 
 const defaultCode: Record<string, string> = {
@@ -219,6 +221,7 @@ export default function Home() {
   }>({ time: null, memory: null });
   const { executeCode, isLoading } = useJudge0();
   const { theme, toggleTheme } = useTheme();
+  const { isLoading: isFixingCode, suggestedCode, showDiff, fixCode, applyFix, rejectFix } = useAICodeFix();
 
   const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage);
@@ -239,6 +242,26 @@ export default function Home() {
     setExecutionStats({
       time: result.executionTime,
       memory: result.memoryUsed
+    });
+  };
+
+  const handleAIFix = async () => {
+    if (error && code) {
+      await fixCode(code, error, language);
+    }
+  };
+
+  const handleApplyFix = () => {
+    applyFix((fixedCode: string) => {
+      setCode(fixedCode);
+      setError('');
+      setOutput('');
+    });
+  };
+
+  const handleRejectFix = () => {
+    rejectFix((code: string) => {
+      setCode(code);
     });
   };
 
@@ -424,6 +447,10 @@ export default function Home() {
                   value={code}
                   onChange={(value) => setCode(value || '')}
                   language={language}
+                  suggestedCode={suggestedCode || undefined}
+                  showDiff={showDiff}
+                  onApplyDiff={handleApplyFix}
+                  onRejectDiff={handleRejectFix}
                 />
               </div>
             </div>
@@ -437,12 +464,15 @@ export default function Home() {
                   isLoading={isLoading}
                   executionTime={executionStats.time}
                   memoryUsed={executionStats.memory}
+                  onAIFix={handleAIFix}
+                  isFixingCode={isFixingCode}
                 />
               </div>
             </div>
           }
         />
       </div>
+
     </div>
   );
 }
