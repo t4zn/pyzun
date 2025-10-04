@@ -210,7 +210,7 @@ End Module`
 export default function Home() {
   const [language, setLanguage] = useState('python');
   const [code, setCode] = useState(defaultCode.python);
-  const [stdin, setStdin] = useState('');
+  const [stdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [executionStats, setExecutionStats] = useState<{

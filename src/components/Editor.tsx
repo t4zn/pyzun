@@ -238,7 +238,7 @@ export default function CodeEditor({ value, onChange, language }: EditorProps) {
           });
 
           // Add custom snippets for popular languages
-          const addLanguageSnippets = (languageId: string, snippets: any[]) => {
+          const addLanguageSnippets = (languageId: string, snippets: monaco.languages.CompletionItem[]) => {
             monaco.languages.registerCompletionItemProvider(languageId, {
               provideCompletionItems: (model, position) => {
                 const word = model.getWordUntilPosition(position);
