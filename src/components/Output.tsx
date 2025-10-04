@@ -11,6 +11,9 @@ interface OutputProps {
   memoryUsed: number | null;
   onAIFix?: () => void;
   isFixingCode?: boolean;
+  stdin?: string;
+  onStdinChange?: (value: string) => void;
+  code?: string;
 }
 
 export default function Output({ 
@@ -20,7 +23,10 @@ export default function Output({
   executionTime, 
   memoryUsed, 
   onAIFix,
-  isFixingCode = false 
+  isFixingCode = false,
+  stdin = '',
+  onStdinChange,
+  code = ''
 }: OutputProps) {
   const formatExecutionTime = (time: number | null) => {
     if (time === null) return null;
@@ -36,6 +42,16 @@ export default function Output({
   };
 
   const showStats = !isLoading && (output || error) && (executionTime !== null || memoryUsed !== null);
+  
+  // Check if code likely needs input
+  const needsInput = code && (
+    code.includes('input(') || 
+    code.includes('scanf(') || 
+    code.includes('cin >>') || 
+    code.includes('Scanner') ||
+    code.includes('readLine') ||
+    code.includes('Console.ReadLine')
+  );
 
   return (
     <div className="h-full flex flex-col" style={{ backgroundColor: 'var(--background)' }}>
@@ -56,6 +72,45 @@ export default function Output({
       </div>
       
       <div className="flex-1 flex flex-col p-6 font-mono text-sm leading-relaxed" style={{ backgroundColor: 'var(--background)' }}>
+        {/* Input Section - Only show if code needs input */}
+        {onStdinChange && needsInput && (
+          <div className="mb-4">
+            <label className="block text-xs font-medium mb-2 opacity-70" style={{ color: 'var(--foreground)' }}>
+              Input for the program (optional):
+            </label>
+            <textarea
+              value={stdin}
+              onChange={(e) => onStdinChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  const textarea = e.currentTarget;
+                  const currentValue = textarea.value;
+                  const cursorPosition = textarea.selectionStart;
+                  const newValue = currentValue.slice(0, cursorPosition) + '\n' + currentValue.slice(cursorPosition);
+                  onStdinChange(newValue);
+                  // Set cursor position after the new line
+                  setTimeout(() => {
+                    if (textarea && typeof textarea.selectionStart === 'number') {
+                      textarea.selectionStart = textarea.selectionEnd = cursorPosition + 1;
+                    }
+                  }, 0);
+                }
+              }}
+              placeholder="Enter input for your program (one value per line, press Enter for new line)..."
+              className="w-full h-20 px-3 py-2 text-sm font-mono resize-none border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 transition-colors"
+              style={{ 
+                backgroundColor: 'var(--background)', 
+                color: 'var(--foreground)',
+                fontFamily: 'var(--font-geist-mono), monospace'
+              }}
+            />
+            <div className="text-xs opacity-60 mt-1" style={{ color: 'var(--foreground)' }}>
+              Tip: Enter each input value on a new line. Press Shift+Enter for line breaks within a value.
+            </div>
+          </div>
+        )}
+        
         {/* Output Content */}
         <div className="flex-1 overflow-auto">
           {isLoading ? (

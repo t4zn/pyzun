@@ -213,7 +213,7 @@ End Module`
 export default function Home() {
   const [language, setLanguage] = useState('python');
   const [code, setCode] = useState(defaultCode.python);
-  const [stdin] = useState('');
+  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [executionStats, setExecutionStats] = useState<{
@@ -473,6 +473,9 @@ export default function Home() {
                   memoryUsed={executionStats.memory}
                   onAIFix={handleAIFix}
                   isFixingCode={isFixingCode}
+                  stdin={stdin}
+                  onStdinChange={setStdin}
+                  code={code}
                 />
               </div>
             </div>
