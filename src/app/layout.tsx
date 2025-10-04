@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pyzun - Online Code Compiler",
-  description: "A minimal, modern online code compiler supporting C, C++, Java, and Python",
+  title: "Pyzun - AI Code Compiler",
+  description: "A minimal, modern AI-powered code compiler with intelligent error fixing and code suggestions",
 };
 
 export default function RootLayout({
