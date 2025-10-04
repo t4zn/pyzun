@@ -9,6 +9,7 @@ import ResizablePanels from '../components/ResizablePanels';
 import { useJudge0 } from '../hooks/useJudge0';
 import { useAICodeFix } from '../hooks/useAICodeFix';
 import { useTheme } from '../components/ThemeProvider';
+import InfoOverlay from '../components/info-overlay';
 
 const defaultCode: Record<string, string> = {
   assembly: `section .data
@@ -479,6 +480,8 @@ export default function Home() {
         />
       </div>
 
+      {/* Info Overlay */}
+      <InfoOverlay />
     </div>
   );
 }
