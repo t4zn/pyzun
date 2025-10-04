@@ -11,6 +11,8 @@ interface Judge0Response {
     id: number;
     description: string;
   };
+  time?: string;
+  memory?: number;
 }
 
 export function useJudge0() {
@@ -28,7 +30,9 @@ export function useJudge0() {
         await new Promise(resolve => setTimeout(resolve, 2000));
         return {
           output: 'Demo mode: Please add your RapidAPI key to .env.local to execute code.\nGet your free key at: https://rapidapi.com/judge0-official/api/judge0-ce/',
-          error: ''
+          error: '',
+          executionTime: null,
+          memoryUsed: null
         };
       }
       
@@ -82,7 +86,12 @@ export function useJudge0() {
           const error = result.stderr ? atob(result.stderr) : 
                        result.compile_output ? atob(result.compile_output) : '';
           
-          return { output, error };
+          return { 
+            output, 
+            error,
+            executionTime: result.time ? parseFloat(result.time) : null,
+            memoryUsed: result.memory || null
+          };
         }
         
         attempts++;
@@ -93,7 +102,9 @@ export function useJudge0() {
       console.error('Judge0 API error:', error);
       return { 
         output: '', 
-        error: error instanceof Error ? error.message : 'An error occurred while executing the code'
+        error: error instanceof Error ? error.message : 'An error occurred while executing the code',
+        executionTime: null,
+        memoryUsed: null
       };
     } finally {
       setIsLoading(false);

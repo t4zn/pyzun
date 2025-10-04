@@ -4,15 +4,42 @@ interface OutputProps {
   output: string;
   error: string;
   isLoading: boolean;
+  executionTime: number | null;
+  memoryUsed: number | null;
 }
 
-export default function Output({ output, error, isLoading }: OutputProps) {
+export default function Output({ output, error, isLoading, executionTime, memoryUsed }: OutputProps) {
+  const formatExecutionTime = (time: number | null) => {
+    if (time === null) return null;
+    if (time < 0.001) return '<1ms';
+    if (time < 1) return `${Math.round(time * 1000)}ms`;
+    return `${time.toFixed(3)}s`;
+  };
 
+  const formatMemory = (memory: number | null) => {
+    if (memory === null) return null;
+    if (memory < 1024) return `${memory}KB`;
+    return `${(memory / 1024).toFixed(1)}MB`;
+  };
+
+  const showStats = !isLoading && (output || error) && (executionTime !== null || memoryUsed !== null);
 
   return (
     <div className="h-full flex flex-col" style={{ backgroundColor: 'var(--background)' }}>
       <div className="p-6 pb-4" style={{ backgroundColor: 'var(--background)' }}>
-        <div className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Output</div>
+        <div className="flex items-center justify-between">
+          <div className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Output</div>
+          {showStats && (
+            <div className="flex items-center gap-4 text-xs font-mono opacity-60" style={{ color: 'var(--foreground)' }}>
+              {executionTime !== null && (
+                <span>{formatExecutionTime(executionTime)}</span>
+              )}
+              {memoryUsed !== null && (
+                <span>{formatMemory(memoryUsed)}</span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="flex-1 flex flex-col p-6 font-mono text-sm leading-relaxed" style={{ backgroundColor: 'var(--background)' }}>

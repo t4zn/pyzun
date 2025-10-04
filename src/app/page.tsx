@@ -4,6 +4,7 @@ import { useState } from 'react';
 import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
 import LanguageSelector from '../components/LanguageSelector';
+import ResizablePanels from '../components/ResizablePanels';
 import { useJudge0 } from '../hooks/useJudge0';
 import { useTheme } from '../components/ThemeProvider';
 
@@ -212,6 +213,10 @@ export default function Home() {
   const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [executionStats, setExecutionStats] = useState<{
+    time: number | null;
+    memory: number | null;
+  }>({ time: null, memory: null });
   const { executeCode, isLoading } = useJudge0();
   const { theme, toggleTheme } = useTheme();
 
@@ -220,15 +225,79 @@ export default function Home() {
     setCode(defaultCode[newLanguage] || '// Write your code here');
     setOutput('');
     setError('');
+    setExecutionStats({ time: null, memory: null });
   };
 
   const handleRunCode = async () => {
     setOutput('');
     setError('');
+    setExecutionStats({ time: null, memory: null });
     
     const result = await executeCode(code, language, stdin);
     setOutput(result.output);
     setError(result.error);
+    setExecutionStats({
+      time: result.executionTime,
+      memory: result.memoryUsed
+    });
+  };
+
+  const getFileExtension = (lang: string): string => {
+    const extensionMap: Record<string, string> = {
+      assembly: 'asm',
+      bash: 'sh',
+      basic: 'bas',
+      c: 'c',
+      cpp: 'cpp',
+      csharp: 'cs',
+      clojure: 'clj',
+      cobol: 'cob',
+      d: 'd',
+      elixir: 'ex',
+      erlang: 'erl',
+      fortran: 'f90',
+      go: 'go',
+      haskell: 'hs',
+      java: 'java',
+      javascript: 'js',
+      kotlin: 'kt',
+      lisp: 'lisp',
+      lua: 'lua',
+      objective_c: 'm',
+      ocaml: 'ml',
+      octave: 'm',
+      pascal: 'pas',
+      perl: 'pl',
+      php: 'php',
+      prolog: 'pl',
+      python: 'py',
+      r: 'r',
+      ruby: 'rb',
+      rust: 'rs',
+      scala: 'scala',
+      sql: 'sql',
+      swift: 'swift',
+      typescript: 'ts',
+      visual_basic: 'vb'
+    };
+    return extensionMap[lang] || 'txt';
+  };
+
+  const handleDownloadCode = () => {
+    const extension = getFileExtension(language);
+    const filename = `code.${extension}`;
+    
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -269,61 +338,110 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-89px)]">
-        {/* Left Panel - Code Editor */}
-        <div className="flex-1 flex flex-col p-8 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
-            <button
-              onClick={handleRunCode}
-              disabled={isLoading}
-              className="p-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-              style={{
-                color: 'var(--foreground)'
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.opacity = '0.7';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.opacity = '1';
-                }
-              }}
-              aria-label={isLoading ? 'Running code...' : 'Run code'}
-            >
-              {isLoading ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
-                  <circle cx="12" cy="12" r="10" opacity="0.3"/>
-                  <path d="M12 6v6l4 2" opacity="0.7"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                  <polygon points="5,3 19,12 5,21" />
-                </svg>
-              )}
-            </button>
-          </div>
-          <div className="flex-1 min-h-[300px]">
-            <CodeEditor
-              value={code}
-              onChange={(value) => setCode(value || '')}
-              language={language}
-            />
-          </div>
-        </div>
-
-        {/* Right Panel - Terminal */}
-        <div className="flex-1 flex flex-col p-8 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
-          <div className="flex-1 min-h-[300px]">
-            <Output 
-              output={output} 
-              error={error} 
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
+      <div className="h-[calc(100vh-89px)]">
+        <ResizablePanels
+          defaultLeftWidth={50}
+          minLeftWidth={25}
+          maxLeftWidth={75}
+          leftPanel={
+            <div className="h-full flex flex-col p-8 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.open(window.location.href, '_blank')}
+                    className="p-3 transition-all duration-200"
+                    style={{
+                      color: 'var(--foreground)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '0.7';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    aria-label="New file"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleDownloadCode}
+                    className="p-3 transition-all duration-200"
+                    style={{
+                      color: 'var(--foreground)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '0.7';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    aria-label="Download code"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7,10 12,15 17,10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleRunCode}
+                    disabled={isLoading}
+                    className="p-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      color: 'var(--foreground)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isLoading) {
+                        e.currentTarget.style.opacity = '0.7';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isLoading) {
+                        e.currentTarget.style.opacity = '1';
+                      }
+                    }}
+                    aria-label={isLoading ? 'Running code...' : 'Run code'}
+                  >
+                    {isLoading ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
+                        <circle cx="12" cy="12" r="10" opacity="0.3"/>
+                        <path d="M12 6v6l4 2" opacity="0.7"/>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                        <polygon points="5,3 19,12 5,21" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 min-h-[300px]">
+                <CodeEditor
+                  value={code}
+                  onChange={(value) => setCode(value || '')}
+                  language={language}
+                />
+              </div>
+            </div>
+          }
+          rightPanel={
+            <div className="h-full flex flex-col p-8 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+              <div className="flex-1 min-h-[300px]">
+                <Output 
+                  output={output} 
+                  error={error} 
+                  isLoading={isLoading}
+                  executionTime={executionStats.time}
+                  memoryUsed={executionStats.memory}
+                />
+              </div>
+            </div>
+          }
+        />
       </div>
     </div>
   );
