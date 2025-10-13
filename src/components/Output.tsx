@@ -56,11 +56,11 @@ export default function Output({
 
   return (
     <div className="h-full flex flex-col" style={{ backgroundColor: 'var(--background)' }}>
-      <div className="p-6 pb-4" style={{ backgroundColor: 'var(--background)' }}>
+      <div className="p-4 sm:p-6 pb-3 sm:pb-4" style={{ backgroundColor: 'var(--background)' }}>
         <div className="flex items-center justify-between">
-          <div className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Output</div>
+          <div className="text-lg sm:text-xl font-light" style={{ color: 'var(--foreground)' }}>Output</div>
           {showStats && (
-            <div className="flex items-center gap-4 text-xs font-mono opacity-60" style={{ color: 'var(--foreground)' }}>
+            <div className="flex items-center gap-2 sm:gap-4 text-xs font-mono opacity-60" style={{ color: 'var(--foreground)' }}>
               {executionTime !== null && (
                 <span>{formatExecutionTime(executionTime)}</span>
               )}
@@ -72,7 +72,7 @@ export default function Output({
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col p-6 font-mono text-sm leading-relaxed" style={{ backgroundColor: 'var(--background)' }}>
+      <div className="flex-1 flex flex-col p-4 sm:p-6 font-mono text-sm leading-relaxed" style={{ backgroundColor: 'var(--background)' }}>
         {/* Input Section - Always show if onStdinChange is provided */}
         {onStdinChange && (
           <div className="mb-4">
@@ -98,8 +98,8 @@ export default function Output({
                   }, 0);
                 }
               }}
-              placeholder="Enter input for your program (one value per line, press Enter for new line)..."
-              className="w-full h-20 px-3 py-2 text-sm font-mono resize-none border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 transition-colors"
+              placeholder="Enter input for your program..."
+              className="w-full h-16 sm:h-20 px-2 sm:px-3 py-2 text-sm font-mono resize-none border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 color: 'var(--foreground)',

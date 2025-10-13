@@ -90,32 +90,32 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-3 font-medium uppercase tracking-wider text-sm flex items-center justify-between min-w-[200px] transition-all duration-200 hover:opacity-80"
+        className="px-2 sm:px-4 py-2 sm:py-3 font-medium uppercase tracking-wider text-xs sm:text-sm flex items-center justify-between min-w-[120px] sm:min-w-[200px] transition-all duration-200 hover:opacity-80"
         style={{
           backgroundColor: 'var(--background)',
           color: 'var(--foreground)'
         }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {selectedLanguage && (
             isOmIcon(selectedLanguage.icon) ? (
-              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
+              <span className="text-sm sm:text-base font-bold">ॐ</span>
             ) : isLispIcon(selectedLanguage.icon) ? (
-              <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
+              <img src="/lisp.png" alt="Lisp" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             ) : (
-              <i className={selectedLanguage.icon} style={{ fontSize: '16px' }}></i>
+              <i className={`${selectedLanguage.icon} text-sm sm:text-base`}></i>
             )
           )}
-          <span>{selectedLanguage?.label || 'Select Language'}</span>
+          <span className="truncate">{selectedLanguage?.label || 'Select Language'}</span>
         </div>
         <svg 
-          width="12" 
-          height="12" 
+          width="10" 
+          height="10" 
           viewBox="0 0 24 24" 
           fill="none" 
           stroke="currentColor" 
           strokeWidth="2"
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`transition-transform duration-200 sm:w-3 sm:h-3 ${isOpen ? 'rotate-180' : ''}`}
         >
           <polyline points="6,9 12,15 18,9"></polyline>
         </svg>

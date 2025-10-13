@@ -300,7 +300,7 @@ export default function Home() {
   const executionStats = activeFile?.executionStats || { time: null, memory: null };
   const { executeCode, isLoading: judge0Loading } = useJudge0();
   const [sanskritLoading, setSanskritLoading] = useState(false);
-  
+
   const isLoading = language === 'sanskrit' ? sanskritLoading : judge0Loading;
   const { theme, toggleTheme } = useTheme();
   const { isLoading: isFixingCode, suggestedCode, showDiff, fixCode, applyFix, rejectFix } = useAICodeFix();
@@ -400,18 +400,18 @@ export default function Home() {
     const lines = code.split('\n');
     const output: string[] = [];
     const errors: string[] = [];
-    
+
     for (let i = 0; i < lines.length; i++) {
       const trimmedLine = lines[i].trim();
-      
+
       // Skip empty lines
       if (!trimmedLine) continue;
-      
+
       // Check if line starts with वद
       if (trimmedLine.startsWith('वद(')) {
         // Validate proper syntax: वद("message");
         const validSyntax = /^वद\("([^"]*)"\);$/.test(trimmedLine);
-        
+
         if (validSyntax) {
           // Extract content between quotes
           const match = trimmedLine.match(/वद\("([^"]*)"\);/);
@@ -427,14 +427,14 @@ export default function Home() {
         errors.push(`Unsupported syntax on line ${i + 1}`);
       }
     }
-    
+
     if (errors.length > 0) {
       return {
         output: '',
         error: 'Your code either has errors or uses different syntax.\n\nSubscribe to unlock full Sanskrit support and advance syntax!'
       };
     }
-    
+
     return {
       output: output.join('\n'),
       error: ''
@@ -453,13 +453,13 @@ export default function Home() {
       // Handle Sanskrit code execution locally with delay
       setSanskritLoading(true);
       const startTime = Date.now();
-      
+
       // Simulate execution delay of 2-3 seconds
       await new Promise(resolve => setTimeout(resolve, 2500));
-      
+
       const result = executeSanskritCode(code);
       const executionTime = (Date.now() - startTime) / 1000;
-      
+
       updateActiveFile({
         output: result.output,
         error: result.error,
@@ -468,7 +468,7 @@ export default function Home() {
           memory: 0
         }
       });
-      
+
       setSanskritLoading(false);
     } else {
       // Use Judge0 for other languages
@@ -567,17 +567,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       {/* Header */}
-      <header className="px-8 py-6" style={{ backgroundColor: 'var(--background)' }}>
+      <header className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6" style={{ backgroundColor: 'var(--background)' }}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/pyzun.svg" alt="Pyzun" className="w-8 h-8" />
-            <h1 className="text-3xl font-medium tracking-wide" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-league-spartan), sans-serif' }}>Pyzun</h1>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <img src="/pyzun.svg" alt="Pyzun" className="w-6 h-6 sm:w-8 sm:h-8" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-medium tracking-wide" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-league-spartan), sans-serif' }}>Pyzun</h1>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
             <LanguageSelector language={language} onChange={handleLanguageChange} />
             <button
               onClick={toggleTheme}
-              className="p-3 transition-all duration-200"
+              className="p-2 sm:p-3 transition-all duration-200"
               style={{
                 color: 'var(--foreground)'
               }}
@@ -590,11 +590,11 @@ export default function Home() {
               aria-label="Toggle theme"
             >
               {theme === 'light' ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="14" height="14" className="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="14" height="14" className="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />
                   <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                 </svg>
@@ -605,257 +605,488 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="h-[calc(100vh-89px)]">
-        <ResizablePanels
-          defaultLeftWidth={50}
-          minLeftWidth={25}
-          maxLeftWidth={75}
-          leftPanel={
-            <div className="h-full flex flex-col p-8 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={createNewFile}
-                    className="p-3 transition-all duration-200"
-                    style={{
-                      color: 'var(--foreground)'
-                    }}
-                    onMouseEnter={(e) => {
+      <div className="h-[calc(100vh-73px)] sm:h-[calc(100vh-89px)]">
+        {/* Mobile Layout - Stack vertically */}
+        <div className="lg:hidden h-full flex flex-col">
+          {/* Editor Section */}
+          <div className="flex-1 min-h-0 flex flex-col p-4 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={createNewFile}
+                  className="p-2 transition-all duration-200"
+                  style={{
+                    color: 'var(--foreground)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.7';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  aria-label="New file"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleDownloadCode}
+                  className="p-2 transition-all duration-200"
+                  style={{
+                    color: 'var(--foreground)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.7';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                  aria-label="Download code"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7,10 12,15 17,10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleRunCode}
+                  disabled={isLoading}
+                  className="p-2 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{
+                    color: 'var(--foreground)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isLoading) {
                       e.currentTarget.style.opacity = '0.7';
-                    }}
-                    onMouseLeave={(e) => {
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isLoading) {
                       e.currentTarget.style.opacity = '1';
-                    }}
-                    aria-label="New file"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
+                    }
+                  }}
+                  aria-label={isLoading ? 'Running code...' : 'Run code'}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center w-4 h-4">
+                      <span className="inline-flex">
+                        <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-1 h-1 bg-current rounded-full animate-pulse mx-0.5" style={{ animationDelay: '200ms' }}></span>
+                        <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></span>
+                      </span>
+                    </div>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                      <polygon points="5,3 19,12 5,21" />
                     </svg>
-                  </button>
-                  <button
-                    onClick={handleDownloadCode}
-                    className="p-3 transition-all duration-200"
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 min-h-0 flex flex-col">
+              {/* Tabs */}
+              <div className="flex items-center overflow-x-auto scrollbar-hide">
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className={`flex items-center gap-2 px-2 py-2 cursor-pointer group min-w-0 rounded-t-md transition-all duration-200 ${file.id === activeFileId
+                      ? 'shadow-sm'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
                     style={{
-                      color: 'var(--foreground)'
+                      backgroundColor: file.id === activeFileId && theme === 'dark' ? '#1e1e1e' : 'transparent',
+                      boxShadow: file.id === activeFileId
+                        ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                        : 'none'
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = '0.7';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = '1';
-                    }}
-                    aria-label="Download code"
+                    onClick={() => switchToFile(file.id)}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7,10 12,15 17,10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={handleRunCode}
-                    disabled={isLoading}
-                    className="p-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    style={{
-                      color: 'var(--foreground)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isLoading) {
-                        e.currentTarget.style.opacity = '0.7';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isLoading) {
-                        e.currentTarget.style.opacity = '1';
-                      }
-                    }}
-                    aria-label={isLoading ? 'Running code...' : 'Run code'}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center w-5 h-5">
-                        <span className="inline-flex">
-                          <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></span>
-                          <span className="w-1 h-1 bg-current rounded-full animate-pulse mx-0.5" style={{ animationDelay: '200ms' }}></span>
-                          <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></span>
+                    {/* File Icon */}
+                    <div className="flex-shrink-0">
+                      {isOmIcon(getLanguageIcon(file.language)) ? (
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                          }}
+                        >
+                          ॐ
+                        </span>
+                      ) : isLispIcon(getLanguageIcon(file.language)) ? (
+                        <img
+                          src="/lisp.png"
+                          alt="Lisp"
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                          }}
+                        />
+                      ) : (
+                        <i
+                          className={getLanguageIcon(file.language)}
+                          style={{
+                            fontSize: '12px',
+                            color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                          }}
+                        ></i>
+                      )}
+                    </div>
+
+                    {/* Filename */}
+                    {isEditingFilename && file.id === activeFileId ? (
+                      <div className="flex items-center min-w-0">
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => handleEditingNameChange(e.target.value)}
+                          onBlur={handleFinishEditing}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleFinishEditing();
+                            } else if (e.key === 'Escape') {
+                              setIsEditingFilename(false);
+                              setEditingName('');
+                            }
+                          }}
+                          className="bg-transparent text-xs font-medium outline-none min-w-0 flex-1"
+                          style={{ color: 'var(--foreground)' }}
+                          autoFocus
+                          onFocus={(e) => e.target.select()}
+                        />
+                        <span className="text-xs font-medium opacity-60 flex-shrink-0" style={{ color: 'var(--foreground)' }}>
+                          .{getFileExtension(file.language)}
                         </span>
                       </div>
                     ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                        <polygon points="5,3 19,12 5,21" />
-                      </svg>
+                      <span
+                        className="text-xs font-medium truncate min-w-0 flex-1"
+                        style={{ color: 'var(--foreground)' }}
+                        onDoubleClick={() => file.id === activeFileId && handleStartEditing()}
+                      >
+                        <span>{getFilenameWithoutExtension(file.filename)}</span>
+                        <span className="opacity-60">.{getFileExtension(file.language)}</span>
+                        {file.isModified && <span className="ml-1 opacity-80">•</span>}
+                      </span>
                     )}
-                  </button>
-                </div>
-              </div>
-              {/* Minimal Tabs attached to code editor */}
-              <div className="flex-1 min-h-[300px] flex flex-col">
-                {/* Tabs */}
-                <div className="flex items-center overflow-x-auto scrollbar-hide">
-                  {files.map((file) => (
-                    <div
-                      key={file.id}
-                      className={`flex items-center gap-2 px-3 py-2 cursor-pointer group min-w-0 rounded-t-md transition-all duration-200 ${file.id === activeFileId
-                        ? 'shadow-sm'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                        }`}
-                      style={{
-                        backgroundColor: file.id === activeFileId && theme === 'dark' ? '#1e1e1e' : 'transparent',
-                        boxShadow: file.id === activeFileId
-                          ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                          : 'none'
-                      }}
-                      onClick={() => switchToFile(file.id)}
-                    >
-                      {/* File Icon */}
-                      <div className="flex-shrink-0">
-                        {isOmIcon(getLanguageIcon(file.language)) ? (
-                          <span 
-                            style={{ 
-                              fontSize: '14px', 
-                              fontWeight: 'bold',
-                              color: file.id === activeFileId ? '#fbbf24' : 'currentColor' 
-                            }}
-                          >
-                            ॐ
-                          </span>
-                        ) : isLispIcon(getLanguageIcon(file.language)) ? (
-                          <img 
-                            src="/lisp.png" 
-                            alt="Lisp" 
-                            style={{ 
-                              width: '14px', 
-                              height: '14px',
-                              filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
-                            }} 
-                          />
-                        ) : (
-                          <i
-                            className={getLanguageIcon(file.language)}
-                            style={{
-                              fontSize: '14px',
-                              color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
-                            }}
-                          ></i>
-                        )}
-                      </div>
 
-                      {/* Filename */}
-                      {isEditingFilename && file.id === activeFileId ? (
-                        <div className="flex items-center min-w-0">
-                          <input
-                            type="text"
-                            value={editingName}
-                            onChange={(e) => handleEditingNameChange(e.target.value)}
-                            onBlur={handleFinishEditing}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleFinishEditing();
-                              } else if (e.key === 'Escape') {
-                                setIsEditingFilename(false);
-                                setEditingName('');
-                              }
-                            }}
-                            className="bg-transparent text-xs font-medium outline-none min-w-0 flex-1"
-                            style={{ color: 'var(--foreground)' }}
-                            autoFocus
-                            onFocus={(e) => e.target.select()}
-                          />
-                          <span className="text-xs font-medium opacity-60 flex-shrink-0" style={{ color: 'var(--foreground)' }}>
-                            .{getFileExtension(file.language)}
-                          </span>
-                        </div>
-                      ) : (
-                        <span
-                          className="text-xs font-medium truncate min-w-0 flex-1"
-                          style={{ color: 'var(--foreground)' }}
-                          onDoubleClick={() => file.id === activeFileId && handleStartEditing()}
-                        >
-                          <span>{getFilenameWithoutExtension(file.filename)}</span>
-                          <span className="opacity-60">.{getFileExtension(file.language)}</span>
-                          {file.isModified && <span className="ml-1 opacity-80">•</span>}
-                        </span>
-                      )}
-
-                      {/* Edit Button - Only show for active file on hover */}
-                      {file.id === activeFileId && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStartEditing();
-                          }}
-                          className="flex-shrink-0 opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity p-1"
-                          style={{ color: 'var(--foreground)' }}
-                          title="Edit filename"
-                        >
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="m13.5 3.5-11 11V19h4.5l11-11a1.5 1.5 0 0 0 0-2.12l-2.38-2.38a1.5 1.5 0 0 0-2.12 0Z" />
-                            <path d="m13.5 6.5 3 3" />
-                          </svg>
-                        </button>
-                      )}
-
-                      {/* Close Button */}
-                      {files.length > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            closeFile(file.id);
-                          }}
-                          className={`flex-shrink-0 transition-opacity p-1 ${
-                            file.id === activeFileId 
-                              ? 'opacity-60 hover:opacity-100' 
-                              : 'opacity-0 group-hover:opacity-60 hover:opacity-100'
+                    {/* Close Button */}
+                    {files.length > 1 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeFile(file.id);
+                        }}
+                        className={`flex-shrink-0 transition-opacity p-1 ${file.id === activeFileId
+                            ? 'opacity-60 hover:opacity-100'
+                            : 'opacity-0 group-hover:opacity-60 hover:opacity-100'
                           }`}
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Code Editor */}
-                <div className="flex-1 rounded-b-md overflow-hidden shadow-md" style={{
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                }}>
-                  <CodeEditor
-                    value={code}
-                    onChange={handleCodeChange}
-                    language={language}
-                    suggestedCode={suggestedCode || undefined}
-                    showDiff={showDiff}
-                    onApplyDiff={handleApplyFix}
-                    onRejectDiff={handleRejectFix}
-                  />
-                </div>
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-            </div>
-          }
-          rightPanel={
-            <div className="h-full flex flex-col p-8 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
-              <div className="flex-1 min-h-[300px]">
-                <Output
-                  output={output}
-                  error={error}
-                  isLoading={isLoading}
-                  executionTime={executionStats.time}
-                  memoryUsed={executionStats.memory}
-                  onAIFix={language !== 'sanskrit' ? handleAIFix : undefined}
-                  isFixingCode={isFixingCode}
-                  stdin={stdin}
-                  onStdinChange={setStdin}
-                  code={code}
+
+              {/* Code Editor */}
+              <div className="flex-1 min-h-0 rounded-b-md overflow-hidden shadow-md" style={{
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              }}>
+                <CodeEditor
+                  value={code}
+                  onChange={handleCodeChange}
+                  language={language}
+                  suggestedCode={suggestedCode || undefined}
+                  showDiff={showDiff}
+                  onApplyDiff={handleApplyFix}
+                  onRejectDiff={handleRejectFix}
                 />
               </div>
             </div>
-          }
-        />
+          </div>
+
+          {/* Output Section */}
+          <div className="flex-1 min-h-0 flex flex-col p-4 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+            <div className="flex-1 min-h-0">
+              <Output
+                output={output}
+                error={error}
+                isLoading={isLoading}
+                executionTime={executionStats.time}
+                memoryUsed={executionStats.memory}
+                onAIFix={language !== 'sanskrit' ? handleAIFix : undefined}
+                isFixingCode={isFixingCode}
+                stdin={stdin}
+                onStdinChange={setStdin}
+                code={code}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout - Resizable panels */}
+        <div className="hidden lg:block h-full">
+          <ResizablePanels
+            defaultLeftWidth={50}
+            minLeftWidth={25}
+            maxLeftWidth={75}
+            leftPanel={
+              <div className="h-full flex flex-col p-8 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={createNewFile}
+                      className="p-3 transition-all duration-200"
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                      aria-label="New file"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleDownloadCode}
+                      className="p-3 transition-all duration-200"
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                      aria-label="Download code"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleRunCode}
+                      disabled={isLoading}
+                      className="p-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isLoading) {
+                          e.currentTarget.style.opacity = '0.7';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isLoading) {
+                          e.currentTarget.style.opacity = '1';
+                        }
+                      }}
+                      aria-label={isLoading ? 'Running code...' : 'Run code'}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center w-5 h-5">
+                          <span className="inline-flex">
+                            <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-1 h-1 bg-current rounded-full animate-pulse mx-0.5" style={{ animationDelay: '200ms' }}></span>
+                            <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></span>
+                          </span>
+                        </div>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                          <polygon points="5,3 19,12 5,21" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                {/* Minimal Tabs attached to code editor */}
+                <div className="flex-1 min-h-[300px] flex flex-col">
+                  {/* Tabs */}
+                  <div className="flex items-center overflow-x-auto scrollbar-hide">
+                    {files.map((file) => (
+                      <div
+                        key={file.id}
+                        className={`flex items-center gap-2 px-3 py-2 cursor-pointer group min-w-0 rounded-t-md transition-all duration-200 ${file.id === activeFileId
+                          ? 'shadow-sm'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                        style={{
+                          backgroundColor: file.id === activeFileId && theme === 'dark' ? '#1e1e1e' : 'transparent',
+                          boxShadow: file.id === activeFileId
+                            ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                            : 'none'
+                        }}
+                        onClick={() => switchToFile(file.id)}
+                      >
+                        {/* File Icon */}
+                        <div className="flex-shrink-0">
+                          {isOmIcon(getLanguageIcon(file.language)) ? (
+                            <span
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                                color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                              }}
+                            >
+                              ॐ
+                            </span>
+                          ) : isLispIcon(getLanguageIcon(file.language)) ? (
+                            <img
+                              src="/lisp.png"
+                              alt="Lisp"
+                              style={{
+                                width: '14px',
+                                height: '14px',
+                                filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                              }}
+                            />
+                          ) : (
+                            <i
+                              className={getLanguageIcon(file.language)}
+                              style={{
+                                fontSize: '14px',
+                                color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                              }}
+                            ></i>
+                          )}
+                        </div>
+
+                        {/* Filename */}
+                        {isEditingFilename && file.id === activeFileId ? (
+                          <div className="flex items-center min-w-0">
+                            <input
+                              type="text"
+                              value={editingName}
+                              onChange={(e) => handleEditingNameChange(e.target.value)}
+                              onBlur={handleFinishEditing}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleFinishEditing();
+                                } else if (e.key === 'Escape') {
+                                  setIsEditingFilename(false);
+                                  setEditingName('');
+                                }
+                              }}
+                              className="bg-transparent text-xs font-medium outline-none min-w-0 flex-1"
+                              style={{ color: 'var(--foreground)' }}
+                              autoFocus
+                              onFocus={(e) => e.target.select()}
+                            />
+                            <span className="text-xs font-medium opacity-60 flex-shrink-0" style={{ color: 'var(--foreground)' }}>
+                              .{getFileExtension(file.language)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-xs font-medium truncate min-w-0 flex-1"
+                            style={{ color: 'var(--foreground)' }}
+                            onDoubleClick={() => file.id === activeFileId && handleStartEditing()}
+                          >
+                            <span>{getFilenameWithoutExtension(file.filename)}</span>
+                            <span className="opacity-60">.{getFileExtension(file.language)}</span>
+                            {file.isModified && <span className="ml-1 opacity-80">•</span>}
+                          </span>
+                        )}
+
+                        {/* Edit Button - Only show for active file on hover */}
+                        {file.id === activeFileId && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartEditing();
+                            }}
+                            className="flex-shrink-0 opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity p-1"
+                            style={{ color: 'var(--foreground)' }}
+                            title="Edit filename"
+                          >
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="m13.5 3.5-11 11V19h4.5l11-11a1.5 1.5 0 0 0 0-2.12l-2.38-2.38a1.5 1.5 0 0 0-2.12 0Z" />
+                              <path d="m13.5 6.5 3 3" />
+                            </svg>
+                          </button>
+                        )}
+
+                        {/* Close Button */}
+                        {files.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              closeFile(file.id);
+                            }}
+                            className={`flex-shrink-0 transition-opacity p-1 ${file.id === activeFileId
+                                ? 'opacity-60 hover:opacity-100'
+                                : 'opacity-0 group-hover:opacity-60 hover:opacity-100'
+                              }`}
+                            style={{ color: 'var(--foreground)' }}
+                          >
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Code Editor */}
+                  <div className="flex-1 rounded-b-md overflow-hidden shadow-md" style={{
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}>
+                    <CodeEditor
+                      value={code}
+                      onChange={handleCodeChange}
+                      language={language}
+                      suggestedCode={suggestedCode || undefined}
+                      showDiff={showDiff}
+                      onApplyDiff={handleApplyFix}
+                      onRejectDiff={handleRejectFix}
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+            rightPanel={
+              <div className="h-full flex flex-col p-8 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+                <div className="flex-1 min-h-[300px]">
+                  <Output
+                    output={output}
+                    error={error}
+                    isLoading={isLoading}
+                    executionTime={executionStats.time}
+                    memoryUsed={executionStats.memory}
+                    onAIFix={language !== 'sanskrit' ? handleAIFix : undefined}
+                    isFixingCode={isFixingCode}
+                    stdin={stdin}
+                    onStdinChange={setStdin}
+                    code={code}
+                  />
+                </div>
+              </div>
+            }
+          />
+        </div>
       </div>
 
       {/* Info Overlay */}

@@ -22,31 +22,45 @@ export default function ResizablePanels({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMove = (clientX: number) => {
       if (!isDragging || !containerRef.current) return;
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+      const newLeftWidth = ((clientX - containerRect.left) / containerRect.width) * 100;
       
       // Clamp the width between min and max values
       const clampedWidth = Math.min(Math.max(newLeftWidth, minLeftWidth), maxLeftWidth);
       setLeftWidth(clampedWidth);
     };
 
-    const handleMouseUp = () => {
+    const handleMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX);
+      }
+    };
+
+    const handleEnd = () => {
       setIsDragging(false);
     };
 
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleEnd);
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleEnd);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
@@ -56,20 +70,25 @@ export default function ResizablePanels({
     setIsDragging(true);
   };
 
+  const handleTouchStart = () => {
+    setIsDragging(true);
+  };
+
   return (
     <div ref={containerRef} className="flex h-full">
       {/* Left Panel */}
       <div 
         style={{ width: `${leftWidth}%` }}
-        className="flex-shrink-0"
+        className="flex-shrink-0 min-w-0"
       >
         {leftPanel}
       </div>
 
       {/* Resizer */}
       <div
-        className="w-6 bg-transparent cursor-col-resize flex-shrink-0 group flex items-center justify-center"
+        className="w-4 sm:w-6 bg-transparent cursor-col-resize flex-shrink-0 group flex items-center justify-center touch-none"
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
         <div className="flex flex-col gap-1 opacity-30 group-hover:opacity-60 transition-opacity duration-200">
           <div 
@@ -98,7 +117,7 @@ export default function ResizablePanels({
       {/* Right Panel */}
       <div 
         style={{ width: `${100 - leftWidth}%` }}
-        className="flex-shrink-0"
+        className="flex-shrink-0 min-w-0"
       >
         {rightPanel}
       </div>
