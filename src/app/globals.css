@@ -500,4 +500,21 @@ div[class*="divider"] {
 
 .monaco-editor .suggest-widget {
   border-right: none !important;
+}/* Inf
+o overlay icon styles */
+.info-icon {
+  color: #374151; /* Gray-700 for light mode */
+  transition: color 0.3s ease;
+}
+
+.dark .info-icon {
+  color: #ffffff; /* White for dark mode */
+}
+
+.group:hover .info-icon {
+  color: #6b7280; /* Gray-500 for light mode hover */
+}
+
+.dark .group:hover .info-icon {
+  color: #d1d5db; /* Gray-300 for dark mode hover */
 }
