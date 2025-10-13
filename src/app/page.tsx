@@ -683,7 +683,11 @@ export default function Home() {
                             e.stopPropagation();
                             closeFile(file.id);
                           }}
-                          className="flex-shrink-0 opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity p-1"
+                          className={`flex-shrink-0 transition-opacity p-1 ${
+                            file.id === activeFileId 
+                              ? 'opacity-60 hover:opacity-100' 
+                              : 'opacity-0 group-hover:opacity-60 hover:opacity-100'
+                          }`}
                           style={{ color: 'var(--foreground)' }}
                         >
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
