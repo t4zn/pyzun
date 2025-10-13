@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
-import LanguageSelector, { getLanguageIcon } from '../components/LanguageSelector';
+import LanguageSelector, { getLanguageIcon, isOmIcon, isLispIcon } from '../components/LanguageSelector';
 import ResizablePanels from '../components/ResizablePanels';
 
 import { useJudge0 } from '../hooks/useJudge0';
 import { useAICodeFix } from '../hooks/useAICodeFix';
 import { useTheme } from '../components/ThemeProvider';
 import InfoOverlay from '../components/info-overlay';
+
+
 
 const defaultCode: Record<string, string> = {
   assembly: `section .data
@@ -207,7 +209,10 @@ Module Program
         Console.WriteLine("Hello, World!")
         Console.WriteLine("Welcome to Pyzun!")
     End Sub
-End Module`
+End Module`,
+
+  sanskrit: `वद("नमस्ते विश्व!");
+वद("पायज़न में आपका स्वागत है!");`
 };
 
 interface FileTab {
@@ -261,7 +266,8 @@ export default function Home() {
       sql: 'query.sql',
       swift: 'main.swift',
       typescript: 'script.ts',
-      visual_basic: 'Main.vb'
+      visual_basic: 'Main.vb',
+      sanskrit: 'hello.ved'
     };
     return defaults[lang] || 'main.txt';
   };
@@ -292,7 +298,10 @@ export default function Home() {
   const output = activeFile?.output || '';
   const error = activeFile?.error || '';
   const executionStats = activeFile?.executionStats || { time: null, memory: null };
-  const { executeCode, isLoading } = useJudge0();
+  const { executeCode, isLoading: judge0Loading } = useJudge0();
+  const [sanskritLoading, setSanskritLoading] = useState(false);
+  
+  const isLoading = language === 'sanskrit' ? sanskritLoading : judge0Loading;
   const { theme, toggleTheme } = useTheme();
   const { isLoading: isFixingCode, suggestedCode, showDiff, fixCode, applyFix, rejectFix } = useAICodeFix();
 
@@ -387,6 +396,51 @@ export default function Home() {
     setEditingName(sanitizedName);
   };
 
+  const executeSanskritCode = (code: string) => {
+    const lines = code.split('\n');
+    const output: string[] = [];
+    const errors: string[] = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const trimmedLine = lines[i].trim();
+      
+      // Skip empty lines
+      if (!trimmedLine) continue;
+      
+      // Check if line starts with वद
+      if (trimmedLine.startsWith('वद(')) {
+        // Validate proper syntax: वद("message");
+        const validSyntax = /^वद\("([^"]*)"\);$/.test(trimmedLine);
+        
+        if (validSyntax) {
+          // Extract content between quotes
+          const match = trimmedLine.match(/वद\("([^"]*)"\);/);
+          if (match && match[1]) {
+            output.push(match[1]);
+          }
+        } else {
+          // Invalid वद syntax
+          errors.push(`Syntax error on line ${i + 1}`);
+        }
+      } else {
+        // Any other syntax is not allowed
+        errors.push(`Unsupported syntax on line ${i + 1}`);
+      }
+    }
+    
+    if (errors.length > 0) {
+      return {
+        output: '',
+        error: 'Your code either has errors or uses different syntax.\n\nSubscribe to unlock full Sanskrit language features and advance syntax!'
+      };
+    }
+    
+    return {
+      output: output.join('\n'),
+      error: ''
+    };
+  };
+
   const handleRunCode = async () => {
     // Clear current file's output
     updateActiveFile({
@@ -395,17 +449,41 @@ export default function Home() {
       executionStats: { time: null, memory: null }
     });
 
-    const result = await executeCode(code, language, stdin);
+    if (language === 'sanskrit') {
+      // Handle Sanskrit code execution locally with delay
+      setSanskritLoading(true);
+      const startTime = Date.now();
+      
+      // Simulate execution delay of 2-3 seconds
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      
+      const result = executeSanskritCode(code);
+      const executionTime = (Date.now() - startTime) / 1000;
+      
+      updateActiveFile({
+        output: result.output,
+        error: result.error,
+        executionStats: {
+          time: executionTime,
+          memory: 0
+        }
+      });
+      
+      setSanskritLoading(false);
+    } else {
+      // Use Judge0 for other languages
+      const result = await executeCode(code, language, stdin);
 
-    // Update current file's output
-    updateActiveFile({
-      output: result.output,
-      error: result.error,
-      executionStats: {
-        time: result.executionTime,
-        memory: result.memoryUsed
-      }
-    });
+      // Update current file's output
+      updateActiveFile({
+        output: result.output,
+        error: result.error,
+        executionStats: {
+          time: result.executionTime,
+          memory: result.memoryUsed
+        }
+      });
+    }
   };
 
   const handleAIFix = async () => {
@@ -466,7 +544,8 @@ export default function Home() {
       sql: 'sql',
       swift: 'swift',
       typescript: 'ts',
-      visual_basic: 'vb'
+      visual_basic: 'vb',
+      sanskrit: 'ved'
     };
     return extensionMap[lang] || 'txt';
   };
@@ -631,13 +710,35 @@ export default function Home() {
                     >
                       {/* File Icon */}
                       <div className="flex-shrink-0">
-                        <i
-                          className={getLanguageIcon(file.language)}
-                          style={{
-                            fontSize: '14px',
-                            color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
-                          }}
-                        ></i>
+                        {isOmIcon(getLanguageIcon(file.language)) ? (
+                          <span 
+                            style={{ 
+                              fontSize: '14px', 
+                              fontWeight: 'bold',
+                              color: file.id === activeFileId ? '#fbbf24' : 'currentColor' 
+                            }}
+                          >
+                            ॐ
+                          </span>
+                        ) : isLispIcon(getLanguageIcon(file.language)) ? (
+                          <img 
+                            src="/lisp.png" 
+                            alt="Lisp" 
+                            style={{ 
+                              width: '14px', 
+                              height: '14px',
+                              filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                            }} 
+                          />
+                        ) : (
+                          <i
+                            className={getLanguageIcon(file.language)}
+                            style={{
+                              fontSize: '14px',
+                              color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                            }}
+                          ></i>
+                        )}
                       </div>
 
                       {/* Filename */}
@@ -745,7 +846,7 @@ export default function Home() {
                   isLoading={isLoading}
                   executionTime={executionStats.time}
                   memoryUsed={executionStats.memory}
-                  onAIFix={handleAIFix}
+                  onAIFix={language !== 'sanskrit' ? handleAIFix : undefined}
                   isFixingCode={isFixingCode}
                   stdin={stdin}
                   onStdinChange={setStdin}

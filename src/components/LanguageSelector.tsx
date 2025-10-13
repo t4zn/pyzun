@@ -11,6 +11,7 @@ interface LanguageSelectorProps {
 }
 
 const languages = [
+  { value: 'sanskrit', label: 'Sanskrit', id: 85, icon: 'om-text', isNew: true },
   { value: 'assembly', label: 'Assembly', id: 45, icon: 'devicon-cplusplus-plain' },
   { value: 'bash', label: 'Bash', id: 46, icon: 'devicon-bash-plain' },
   { value: 'basic', label: 'Basic', id: 47, icon: 'devicon-bootstrap-plain' },
@@ -28,7 +29,7 @@ const languages = [
   { value: 'java', label: 'Java', id: 62, icon: 'devicon-java-plain' },
   { value: 'javascript', label: 'JavaScript', id: 63, icon: 'devicon-javascript-plain' },
   { value: 'kotlin', label: 'Kotlin', id: 78, icon: 'devicon-kotlin-plain' },
-  { value: 'lisp', label: 'Lisp', id: 55, icon: 'devicon-lisp-plain' },
+  { value: 'lisp', label: 'Lisp', id: 55, icon: 'lisp-png' },
   { value: 'lua', label: 'Lua', id: 64, icon: 'devicon-lua-plain' },
   { value: 'objective_c', label: 'Objective-C', id: 79, icon: 'devicon-objectivec-plain' },
   { value: 'ocaml', label: 'OCaml', id: 65, icon: 'devicon-ocaml-plain' },
@@ -97,7 +98,13 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
       >
         <div className="flex items-center gap-2">
           {selectedLanguage && (
-            <i className={selectedLanguage.icon} style={{ fontSize: '16px' }}></i>
+            isOmIcon(selectedLanguage.icon) ? (
+              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
+            ) : isLispIcon(selectedLanguage.icon) ? (
+              <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
+            ) : (
+              <i className={selectedLanguage.icon} style={{ fontSize: '16px' }}></i>
+            )
           )}
           <span>{selectedLanguage?.label || 'Select Language'}</span>
         </div>
@@ -147,14 +154,34 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
                 <button
                   key={lang.value}
                   onClick={() => handleSelect(lang.value)}
-                  className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2"
+                  className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2 justify-between"
                   style={{
                     backgroundColor: lang.value === language ? 'var(--foreground)' : 'var(--background)',
                     color: lang.value === language ? 'var(--background)' : 'var(--foreground)'
                   }}
                 >
-                  <i className={lang.icon} style={{ fontSize: '16px' }}></i>
-                  <span>{lang.label}</span>
+                  <div className="flex items-center gap-2">
+                    {isOmIcon(lang.icon) ? (
+                      <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
+                    ) : isLispIcon(lang.icon) ? (
+                      <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
+                    ) : (
+                      <i className={lang.icon} style={{ fontSize: '16px' }}></i>
+                    )}
+                    <span>{lang.label}</span>
+                  </div>
+                  {lang.isNew && (
+                    <span 
+                      className="px-1 py-0.5 font-medium rounded opacity-70"
+                      style={{
+                        backgroundColor: 'var(--foreground)',
+                        color: 'var(--background)',
+                        fontSize: '9px'
+                      }}
+                    >
+                      NEW
+                    </span>
+                  )}
                 </button>
               ))
             ) : (
@@ -174,4 +201,12 @@ export { languages };
 export const getLanguageIcon = (languageValue: string): string => {
   const lang = languages.find(l => l.value === languageValue);
   return lang?.icon || 'devicon-plain-wordmark';
+};
+
+export const isOmIcon = (icon: string): boolean => {
+  return icon === 'om-text';
+};
+
+export const isLispIcon = (icon: string): boolean => {
+  return icon === 'lisp-png';
 };

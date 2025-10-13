@@ -51,7 +51,8 @@ const languageMap: Record<string, string> = {
   'sql': 'sql',
   'swift': 'swift',
   'typescript': 'typescript',
-  'visual_basic': 'vb'
+  'visual_basic': 'vb',
+  'sanskrit': 'sanskrit'
 };
 
 export default function CodeEditor({ 
@@ -126,6 +127,20 @@ export default function CodeEditor({
     applyDiffDecorations();
   };
 
+  // Clear undo history when language changes
+  useEffect(() => {
+    if (editorRef.current && monacoRef.current) {
+      const model = editorRef.current.getModel();
+      if (model) {
+        // Clear the entire undo/redo stack when language changes
+        const currentValue = model.getValue();
+        model.setValue('');
+        model.setValue(currentValue);
+        // This effectively clears the undo history by creating a new baseline
+      }
+    }
+  }, [language]);
+
   useEffect(() => {
     applyDiffDecorations();
   }, [showDiff, suggestedCode, value, applyDiffDecorations]);
@@ -197,7 +212,11 @@ export default function CodeEditor({
             editor.trigger('keyboard', 'editor.action.triggerParameterHints', {});
           });
         }}
-        theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
+        theme={
+          language === 'sanskrit' 
+            ? (theme === 'dark' ? 'sanskrit-theme-dark' : 'sanskrit-theme-light')
+            : (theme === 'dark' ? 'vs-dark' : 'vs-light')
+        }
         options={{
           // Basic editor options
           minimap: { enabled: false },
@@ -301,6 +320,55 @@ export default function CodeEditor({
           }
         }}
         beforeMount={(monaco) => {
+          // Register Sanskrit language
+          monaco.languages.register({ id: 'sanskrit' });
+
+          // Define Sanskrit syntax highlighting
+          monaco.languages.setMonarchTokensProvider('sanskrit', {
+            tokenizer: {
+              root: [
+                // Sanskrit function 'वद' in blue
+                [/वद/, 'keyword'],
+                // String literals in red (content inside quotes)
+                [/"([^"\\]|\\.)*$/, 'string.invalid'],  // non-terminated string
+                [/"/, 'string', '@string'],
+                // Parentheses and semicolons
+                [/[()]/, 'delimiter.parenthesis'],
+                [/;/, 'delimiter.semicolon'],
+              ],
+              string: [
+                [/[^\\"]+/, 'string'],
+                [/\\./, 'string.escape.invalid'],
+                [/"/, 'string', '@pop']
+              ]
+            }
+          });
+
+          // Define Sanskrit theme colors (using Python's colors)
+          monaco.editor.defineTheme('sanskrit-theme-light', {
+            base: 'vs',
+            inherit: true,
+            rules: [
+              { token: 'keyword', foreground: '0000ff' }, // Python blue for वद
+              { token: 'string', foreground: 'a31515' }, // Python red for strings
+              { token: 'delimiter.parenthesis', foreground: '000000' },
+              { token: 'delimiter.semicolon', foreground: '000000' }
+            ],
+            colors: {}
+          });
+
+          monaco.editor.defineTheme('sanskrit-theme-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+              { token: 'keyword', foreground: '569cd6' }, // Python light blue for वद
+              { token: 'string', foreground: 'ce9178' }, // Python light red for strings
+              { token: 'delimiter.parenthesis', foreground: 'ffffff' },
+              { token: 'delimiter.semicolon', foreground: 'ffffff' }
+            ],
+            colors: {}
+          });
+
           // Configure TypeScript/JavaScript language features
           monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
           monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
