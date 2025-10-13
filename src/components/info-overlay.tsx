@@ -82,7 +82,7 @@ export default function InfoOverlay() {
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="text-gray-700"
+                className="text-gray-700 dark:text-gray-300"
               >
                 <path
                   d="M18 6L6 18"
@@ -113,7 +113,7 @@ export default function InfoOverlay() {
                 >
                   About
                   {activeSection === 'about' && (
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black dark:bg-white"></div>
                   )}
                 </button>
                 <button
@@ -125,7 +125,7 @@ export default function InfoOverlay() {
                 >
                   Pricing
                   {activeSection === 'pricing' && (
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black dark:bg-white"></div>
                   )}
                 </button>
                 <button
@@ -137,7 +137,7 @@ export default function InfoOverlay() {
                 >
                   Contact
                   {activeSection === 'contact' && (
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black"></div>
+                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 bg-black dark:bg-white"></div>
                   )}
                 </button>
               </div>
@@ -165,13 +165,13 @@ export default function InfoOverlay() {
 
                     {/* Name and Title */}
                     <div className="flex-1">
-                      <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-0.5">Taizun</h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">AI Developer</p>
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-gray-200 mb-0.5">Taizun</h3>
+                      <p className="text-xs text-gray-800 dark:text-gray-400 font-medium">AI Developer</p>
                     </div>
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+                  <div className="space-y-1.5 text-gray-900 dark:text-gray-300">
                     <p className="text-xs leading-tight">
                       I am a BTech CSE 2nd Year Student at Medicaps University, Indore.
                     </p>
@@ -319,15 +319,15 @@ export default function InfoOverlay() {
               {activeSection === 'pricing' && (
                 <div className="space-y-3">
                   <div className="text-center">
-                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">AI Compiler Plans</h3>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-200 mb-2">AI Compiler Plans</h3>
                   </div>
                   <div className="space-y-1.5">
                     <div className="p-2 bg-white/10 rounded border border-white/20">
                       <div className="flex justify-between items-center mb-1">
-                        <h4 className="text-xs font-semibold text-gray-800 dark:text-gray-200">Basic</h4>
-                        <span className="text-xs font-bold text-gray-800 dark:text-gray-200">$9.99</span>
+                        <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200">Basic</h4>
+                        <span className="text-xs font-bold text-gray-900 dark:text-gray-200">$9.99</span>
                       </div>
-                      <div className="text-xs text-gray-700 dark:text-gray-300 space-y-0.5">
+                      <div className="text-xs text-gray-800 dark:text-gray-300 space-y-0.5">
                         <div>100 AI code fixes</div>
                         <div>Basic error detection</div>
                         <div>5 languages supported</div>
@@ -335,10 +335,10 @@ export default function InfoOverlay() {
                     </div>
                     <div className="p-2 bg-white/15 rounded border border-white/30">
                       <div className="flex justify-between items-center mb-1">
-                        <h4 className="text-xs font-semibold text-gray-800 dark:text-gray-200">Pro</h4>
-                        <span className="text-xs font-bold text-gray-800 dark:text-gray-200">$19.99</span>
+                        <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200">Pro</h4>
+                        <span className="text-xs font-bold text-gray-900 dark:text-gray-200">$19.99</span>
                       </div>
-                      <div className="text-xs text-gray-700 dark:text-gray-300 space-y-0.5">
+                      <div className="text-xs text-gray-800 dark:text-gray-300 space-y-0.5">
                         <div>500 AI code fixes</div>
                         <div>Advanced error analysis</div>
                         <div>All languages supported</div>
@@ -347,10 +347,10 @@ export default function InfoOverlay() {
                     </div>
                     <div className="p-2 bg-white/20 rounded border border-white/40">
                       <div className="flex justify-between items-center mb-1">
-                        <h4 className="text-xs font-semibold text-gray-800 dark:text-gray-200">Enterprise</h4>
-                        <span className="text-xs font-bold text-gray-800 dark:text-gray-200">$49.99</span>
+                        <h4 className="text-xs font-semibold text-gray-900 dark:text-gray-200">Enterprise</h4>
+                        <span className="text-xs font-bold text-gray-900 dark:text-gray-200">$49.99</span>
                       </div>
-                      <div className="text-xs text-gray-700 dark:text-gray-300 space-y-0.5">
+                      <div className="text-xs text-gray-800 dark:text-gray-300 space-y-0.5">
                         <div>Unlimited AI fixes</div>
                         <div>Custom AI models</div>
                         <div>Priority support</div>
@@ -365,19 +365,19 @@ export default function InfoOverlay() {
               {activeSection === 'contact' && (
                 <div className="space-y-3">
                   <div className="text-center">
-                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">Contact</h3>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-200 mb-2">Contact</h3>
                   </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                  <div className="space-y-2 text-gray-800 dark:text-gray-300">
                     <p className="text-xs text-center leading-tight">
                       Ready to upgrade? Contact me to purchase your premium subscription!
                     </p>
 
                     {/* Plan Selection */}
                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Select Plan:</label>
+                      <label className="text-xs font-medium text-gray-800 dark:text-gray-300">Select Plan:</label>
                       <select
                         id="planSelect"
-                        className="w-full text-xs p-1.5 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 focus:outline-none"
+                        className="w-full text-xs p-1.5 bg-transparent border-none outline-none text-gray-900 dark:text-gray-200 focus:outline-none"
                         defaultValue="basic"
                       >
                         <option value="basic">Basic - $9.99 (100 AI fixes, 5 languages)</option>
@@ -415,7 +415,7 @@ Thank you!`
 
                     {/* Additional Contact Info */}
                     <div className="pt-2">
-                      <p className="text-xs text-gray-600 dark:text-gray-300 text-center leading-tight">
+                      <p className="text-xs text-gray-800 dark:text-gray-300 text-center leading-tight">
                         You will receive a reply within 24 hours
                       </p>
                     </div>

@@ -431,7 +431,7 @@ export default function Home() {
     if (errors.length > 0) {
       return {
         output: '',
-        error: 'Your code either has errors or uses different syntax.\n\nSubscribe to unlock full Sanskrit language features and advance syntax!'
+        error: 'Your code either has errors or uses different syntax.\n\nSubscribe to unlock full Sanskrit support and advance syntax!'
       };
     }
     
