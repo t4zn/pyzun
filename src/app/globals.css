@@ -318,3 +318,186 @@ body, html, div, main, section, article, aside, header, footer, nav {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* Remove viewport borders and ensure full coverage */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Remove any potential scrollbar borders */
+::-webkit-scrollbar {
+  border: none !important;
+}
+
+::-webkit-scrollbar-track {
+  border: none !important;
+}
+
+::-webkit-scrollbar-thumb {
+  border: none !important;
+}
+
+/* Remove borders from viewport edges */
+#__next, [data-nextjs-scroll-focus-boundary] {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Ensure no borders on main containers */
+main, .min-h-screen {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Target browser default borders */
+html {
+  border: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  border: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove any potential iframe or embed borders */
+iframe, embed, object {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove table borders */
+table, tr, td, th {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove form element borders */
+input, textarea, select, button {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove image borders */
+img {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove any potential pseudo-element borders */
+*::before, *::after {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Specifically target right edge borders */
+body {
+  border-right: none !important;
+}
+
+html {
+  border-right: none !important;
+}
+
+/* Remove any potential right borders from containers */
+.min-h-screen {
+  border-right: none !important;
+}
+
+/* Target Monaco Editor right borders specifically */
+.monaco-editor .overflow-guard {
+  border-right: none !important;
+}
+
+.monaco-editor .editor-scrollable {
+  border-right: none !important;
+}
+
+.monaco-editor .lines-content {
+  border-right: none !important;
+}
+
+/* Remove right borders from any flex containers */
+.flex, .flex-col, .flex-row {
+  border-right: none !important;
+}
+
+/* Remove borders from resizable panels */
+.resizable-panel, .panel-container, .split-pane {
+  border: none !important;
+  border-right: none !important;
+}
+
+/* Target any potential splitter or divider */
+.splitter, .divider, .separator {
+  display: none !important;
+  border: none !important;
+}
+
+/* Remove right borders from viewport */
+#__next {
+  border-right: none !important;
+  overflow-x: hidden !important;
+}
+
+/* Ensure no right borders on main app container */
+[data-nextjs-scroll-focus-boundary] {
+  border-right: none !important;
+  overflow-x: hidden !important;
+}
+
+/* Remove any potential right scrollbar */
+::-webkit-scrollbar-track:vertical {
+  display: none !important;
+}
+
+::-webkit-scrollbar:vertical {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* Hide resizer/divider elements that might create vertical lines */
+.cursor-col-resize {
+  display: none !important;
+}
+
+/* Hide any resizer dots or indicators */
+.cursor-col-resize .flex-col {
+  display: none !important;
+}
+
+/* Remove any potential panel dividers */
+.panel-divider, .resize-handle, .splitter-layout > .layout-splitter {
+  display: none !important;
+}
+
+/* Force hide any element that might be creating the right border */
+div[style*="cursor: col-resize"], 
+div[class*="resize"], 
+div[class*="splitter"],
+div[class*="divider"] {
+  display: none !important;
+}
+
+/* Ensure panels take full width without gaps */
+.flex.h-full > div:last-child {
+  border-right: none !important;
+}
+
+/* Remove any potential Monaco Editor right panel borders */
+.monaco-editor .editor-widget {
+  border-right: none !important;
+}
+
+.monaco-editor .suggest-widget {
+  border-right: none !important;
+}
