@@ -622,6 +622,7 @@ export default function Home() {
                         : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                         }`}
                       style={{
+                        backgroundColor: file.id === activeFileId && theme === 'dark' ? '#1e1e1e' : 'transparent',
                         boxShadow: file.id === activeFileId
                           ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                           : 'none'
@@ -674,6 +675,24 @@ export default function Home() {
                           <span className="opacity-60">.{getFileExtension(file.language)}</span>
                           {file.isModified && <span className="ml-1 opacity-80">•</span>}
                         </span>
+                      )}
+
+                      {/* Edit Button - Only show for active file on hover */}
+                      {file.id === activeFileId && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartEditing();
+                          }}
+                          className="flex-shrink-0 opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity p-1"
+                          style={{ color: 'var(--foreground)' }}
+                          title="Edit filename"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="m13.5 3.5-11 11V19h4.5l11-11a1.5 1.5 0 0 0 0-2.12l-2.38-2.38a1.5 1.5 0 0 0-2.12 0Z" />
+                            <path d="m13.5 6.5 3 3" />
+                          </svg>
+                        </button>
                       )}
 
                       {/* Close Button */}
