@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTheme } from './ThemeProvider';
 
 interface LanguageSelectorProps {
   language: string;
@@ -52,6 +53,7 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { theme } = useTheme();
 
   const filteredLanguages = languages.filter(lang =>
     lang.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -127,10 +129,13 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search languages..."
-              className="w-full px-2 py-1 bg-transparent outline-none font-mono text-sm"
+              className="w-full px-2 py-1 bg-transparent outline-none font-mono text-sm rounded border border-gray-200 dark:border-gray-700"
               style={{ 
                 color: 'var(--foreground)',
-                backgroundColor: 'transparent'
+                backgroundColor: 'var(--background)',
+                boxShadow: theme === 'dark' 
+                  ? '0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06)'
+                  : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
               }}
             />
           </div>

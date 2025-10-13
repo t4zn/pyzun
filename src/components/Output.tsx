@@ -16,18 +16,19 @@ interface OutputProps {
   code?: string;
 }
 
-export default function Output({ 
-  output, 
-  error, 
-  isLoading, 
-  executionTime, 
-  memoryUsed, 
+export default function Output({
+  output,
+  error,
+  isLoading,
+  executionTime,
+  memoryUsed,
   onAIFix,
   isFixingCode = false,
   stdin = '',
   onStdinChange,
   code = ''
 }: OutputProps) {
+  const { theme } = useTheme();
   const formatExecutionTime = (time: number | null) => {
     if (time === null) return null;
     if (time < 0.001) return '<1ms';
@@ -42,12 +43,12 @@ export default function Output({
   };
 
   const showStats = !isLoading && (output || error) && (executionTime !== null || memoryUsed !== null);
-  
+
   // Check if code likely needs input
   const needsInput = code && (
-    code.includes('input(') || 
-    code.includes('scanf(') || 
-    code.includes('cin >>') || 
+    code.includes('input(') ||
+    code.includes('scanf(') ||
+    code.includes('cin >>') ||
     code.includes('Scanner') ||
     code.includes('readLine') ||
     code.includes('Console.ReadLine')
@@ -70,7 +71,7 @@ export default function Output({
           )}
         </div>
       </div>
-      
+
       <div className="flex-1 flex flex-col p-6 font-mono text-sm leading-relaxed" style={{ backgroundColor: 'var(--background)' }}>
         {/* Input Section - Always show if onStdinChange is provided */}
         {onStdinChange && (
@@ -99,10 +100,13 @@ export default function Output({
               }}
               placeholder="Enter input for your program (one value per line, press Enter for new line)..."
               className="w-full h-20 px-3 py-2 text-sm font-mono resize-none border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 transition-colors"
-              style={{ 
-                backgroundColor: 'var(--background)', 
+              style={{
+                backgroundColor: 'var(--background)',
                 color: 'var(--foreground)',
-                fontFamily: 'var(--font-geist-mono), monospace'
+                fontFamily: 'var(--font-geist-mono), monospace',
+                boxShadow: theme === 'dark'
+                  ? '0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06)'
+                  : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
               }}
             />
             <div className="text-xs opacity-60 mt-1" style={{ color: 'var(--foreground)' }}>
@@ -110,7 +114,7 @@ export default function Output({
             </div>
           </div>
         )}
-        
+
         {/* Output Content */}
         <div className="flex-1 overflow-auto">
           {isLoading ? (
@@ -133,9 +137,9 @@ export default function Output({
                     <span
                       onClick={onAIFix}
                       className="group inline-flex items-center gap-1.5 cursor-pointer hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200 text-xs font-semibold tracking-wide"
-                      style={{ 
-                        color: 'var(--foreground)', 
-                        fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' 
+                      style={{
+                        color: 'var(--foreground)',
+                        fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
                       }}
                       title="Fix code with AI"
                     >
@@ -158,7 +162,7 @@ export default function Output({
             </>
           )}
         </div>
-        
+
 
       </div>
     </div>
