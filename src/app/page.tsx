@@ -257,6 +257,7 @@ export default function Home() {
 
   const [filename, setFilename] = useState(getDefaultFilename('python'));
   const [isEditingFilename, setIsEditingFilename] = useState(false);
+  const [editingName, setEditingName] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [executionStats, setExecutionStats] = useState<{
@@ -276,6 +277,32 @@ export default function Home() {
 
     // Update filename to default for the new language
     setFilename(getDefaultFilename(newLanguage));
+  };
+
+  const getFilenameWithoutExtension = (fullFilename: string): string => {
+    const lastDotIndex = fullFilename.lastIndexOf('.');
+    return lastDotIndex === -1 ? fullFilename : fullFilename.substring(0, lastDotIndex);
+  };
+
+  const handleStartEditing = () => {
+    const nameWithoutExt = getFilenameWithoutExtension(filename);
+    setEditingName(nameWithoutExt);
+    setIsEditingFilename(true);
+  };
+
+  const handleFinishEditing = () => {
+    if (editingName.trim()) {
+      const currentExtension = getFileExtension(language);
+      setFilename(`${editingName.trim()}.${currentExtension}`);
+    }
+    setIsEditingFilename(false);
+    setEditingName('');
+  };
+
+  const handleEditingNameChange = (newName: string) => {
+    // Only allow alphanumeric characters, hyphens, underscores, and spaces
+    const sanitizedName = newName.replace(/[^a-zA-Z0-9\-_\s]/g, '');
+    setEditingName(sanitizedName);
   };
 
   const handleRunCode = async () => {
@@ -502,27 +529,37 @@ export default function Home() {
                   }}
                 >
                   {isEditingFilename ? (
-                    <input
-                      type="text"
-                      value={filename}
-                      onChange={(e) => setFilename(e.target.value)}
-                      onBlur={() => setIsEditingFilename(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          setIsEditingFilename(false);
-                        }
-                      }}
-                      className="bg-transparent text-xs font-medium outline-none min-w-0"
-                      style={{ color: 'var(--foreground)' }}
-                      autoFocus
-                    />
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => handleEditingNameChange(e.target.value)}
+                        onBlur={handleFinishEditing}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleFinishEditing();
+                          } else if (e.key === 'Escape') {
+                            setIsEditingFilename(false);
+                            setEditingName('');
+                          }
+                        }}
+                        className="bg-transparent text-xs font-medium outline-none min-w-0"
+                        style={{ color: 'var(--foreground)' }}
+                        autoFocus
+                        onFocus={(e) => e.target.select()}
+                      />
+                      <span className="text-xs font-medium opacity-60" style={{ color: 'var(--foreground)' }}>
+                        .{getFileExtension(language)}
+                      </span>
+                    </div>
                   ) : (
                     <div
                       className="flex items-center gap-1 group cursor-pointer"
-                      onClick={() => setIsEditingFilename(true)}
+                      onClick={handleStartEditing}
                     >
                       <span className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>
-                        {filename}
+                        <span>{getFilenameWithoutExtension(filename)}</span>
+                        <span className="opacity-60">.{getFileExtension(language)}</span>
                       </span>
                       <svg
                         width="10"
