@@ -30,6 +30,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${leagueSpartan.variable} antialiased h-full`}
         style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}

@@ -24,7 +24,7 @@ export default function InfoOverlay() {
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="text-black dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors"
+          className="text-gray-800 dark:text-white group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
         >
           <circle
             cx="12"
@@ -107,8 +107,8 @@ export default function InfoOverlay() {
                 <button
                   onClick={() => setActiveSection('about')}
                   className={`px-2 py-1 text-xs transition-colors relative ${activeSection === 'about'
-                      ? 'text-black dark:text-white font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'text-black dark:text-white font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                 >
                   About
@@ -119,8 +119,8 @@ export default function InfoOverlay() {
                 <button
                   onClick={() => setActiveSection('pricing')}
                   className={`px-2 py-1 text-xs transition-colors relative ${activeSection === 'pricing'
-                      ? 'text-black dark:text-white font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'text-black dark:text-white font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                 >
                   Pricing
@@ -131,8 +131,8 @@ export default function InfoOverlay() {
                 <button
                   onClick={() => setActiveSection('contact')}
                   className={`px-2 py-1 text-xs transition-colors relative ${activeSection === 'contact'
-                      ? 'text-black dark:text-white font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'text-black dark:text-white font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                 >
                   Contact

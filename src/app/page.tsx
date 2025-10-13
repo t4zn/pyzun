@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
-import LanguageSelector from '../components/LanguageSelector';
+import LanguageSelector, { getLanguageIcon } from '../components/LanguageSelector';
 import ResizablePanels from '../components/ResizablePanels';
 
 import { useJudge0 } from '../hooks/useJudge0';
@@ -210,10 +210,21 @@ Module Program
 End Module`
 };
 
+interface FileTab {
+  id: string;
+  filename: string;
+  language: string;
+  code: string;
+  isModified: boolean;
+  output?: string;
+  error?: string;
+  executionStats?: {
+    time: number | null;
+    memory: number | null;
+  };
+}
+
 export default function Home() {
-  const [language, setLanguage] = useState('python');
-  const [code, setCode] = useState(defaultCode.python);
-  const [stdin, setStdin] = useState('');
   const getDefaultFilename = (lang: string) => {
     const defaults: Record<string, string> = {
       assembly: 'main.asm',
@@ -255,28 +266,98 @@ export default function Home() {
     return defaults[lang] || 'main.txt';
   };
 
-  const [filename, setFilename] = useState(getDefaultFilename('python'));
+  // Initialize with one default file
+  const [files, setFiles] = useState<FileTab[]>([
+    {
+      id: '1',
+      filename: getDefaultFilename('python'),
+      language: 'python',
+      code: defaultCode.python,
+      isModified: false,
+      output: '',
+      error: '',
+      executionStats: { time: null, memory: null }
+    }
+  ]);
+  const [activeFileId, setActiveFileId] = useState('1');
   const [isEditingFilename, setIsEditingFilename] = useState(false);
   const [editingName, setEditingName] = useState('');
-  const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
-  const [executionStats, setExecutionStats] = useState<{
-    time: number | null;
-    memory: number | null;
-  }>({ time: null, memory: null });
+  const [stdin, setStdin] = useState('');
+
+  // Get current active file
+  const activeFile = files.find(f => f.id === activeFileId) || files[0];
+  const language = activeFile?.language || 'python';
+  const code = activeFile?.code || '';
+  const filename = activeFile?.filename || 'main.py';
+  const output = activeFile?.output || '';
+  const error = activeFile?.error || '';
+  const executionStats = activeFile?.executionStats || { time: null, memory: null };
   const { executeCode, isLoading } = useJudge0();
   const { theme, toggleTheme } = useTheme();
   const { isLoading: isFixingCode, suggestedCode, showDiff, fixCode, applyFix, rejectFix } = useAICodeFix();
 
-  const handleLanguageChange = (newLanguage: string) => {
-    setLanguage(newLanguage);
-    setCode(defaultCode[newLanguage] || '// Write your code here');
-    setOutput('');
-    setError('');
-    setExecutionStats({ time: null, memory: null });
+  const updateActiveFile = (updates: Partial<FileTab>) => {
+    setFiles(prev => prev.map(file =>
+      file.id === activeFileId
+        ? { ...file, ...updates, isModified: true }
+        : file
+    ));
+  };
 
-    // Update filename to default for the new language
-    setFilename(getDefaultFilename(newLanguage));
+  const handleLanguageChange = (newLanguage: string) => {
+    const newFilename = getDefaultFilename(newLanguage);
+    const newCode = defaultCode[newLanguage] || '// Write your code here';
+
+    updateActiveFile({
+      language: newLanguage,
+      filename: newFilename,
+      code: newCode,
+      isModified: false,
+      output: '',
+      error: '',
+      executionStats: { time: null, memory: null }
+    });
+  };
+
+  const handleCodeChange = (newCode: string | undefined) => {
+    updateActiveFile({ code: newCode || '' });
+  };
+
+  const createNewFile = () => {
+    const newId = Date.now().toString();
+    const currentLanguage = language; // Use the currently active file's language
+    const newFile: FileTab = {
+      id: newId,
+      filename: getDefaultFilename(currentLanguage),
+      language: currentLanguage,
+      code: defaultCode[currentLanguage] || '// Write your code here',
+      isModified: false,
+      output: '',
+      error: '',
+      executionStats: { time: null, memory: null }
+    };
+
+    setFiles(prev => [...prev, newFile]);
+    setActiveFileId(newId);
+  };
+
+  const closeFile = (fileId: string) => {
+    if (files.length === 1) return; // Don't close the last file
+
+    setFiles(prev => {
+      const newFiles = prev.filter(f => f.id !== fileId);
+      // If we're closing the active file, switch to another one
+      if (fileId === activeFileId) {
+        const currentIndex = prev.findIndex(f => f.id === fileId);
+        const nextFile = prev[currentIndex + 1] || prev[currentIndex - 1] || newFiles[0];
+        setActiveFileId(nextFile.id);
+      }
+      return newFiles;
+    });
+  };
+
+  const switchToFile = (fileId: string) => {
+    setActiveFileId(fileId);
   };
 
   const getFilenameWithoutExtension = (fullFilename: string): string => {
@@ -293,7 +374,8 @@ export default function Home() {
   const handleFinishEditing = () => {
     if (editingName.trim()) {
       const currentExtension = getFileExtension(language);
-      setFilename(`${editingName.trim()}.${currentExtension}`);
+      const newFilename = `${editingName.trim()}.${currentExtension}`;
+      updateActiveFile({ filename: newFilename });
     }
     setIsEditingFilename(false);
     setEditingName('');
@@ -306,16 +388,23 @@ export default function Home() {
   };
 
   const handleRunCode = async () => {
-    setOutput('');
-    setError('');
-    setExecutionStats({ time: null, memory: null });
+    // Clear current file's output
+    updateActiveFile({
+      output: '',
+      error: '',
+      executionStats: { time: null, memory: null }
+    });
 
     const result = await executeCode(code, language, stdin);
-    setOutput(result.output);
-    setError(result.error);
-    setExecutionStats({
-      time: result.executionTime,
-      memory: result.memoryUsed
+
+    // Update current file's output
+    updateActiveFile({
+      output: result.output,
+      error: result.error,
+      executionStats: {
+        time: result.executionTime,
+        memory: result.memoryUsed
+      }
     });
   };
 
@@ -327,15 +416,17 @@ export default function Home() {
 
   const handleApplyFix = () => {
     applyFix((fixedCode: string) => {
-      setCode(fixedCode);
-      setError('');
-      setOutput('');
+      updateActiveFile({
+        code: fixedCode,
+        error: '',
+        output: ''
+      });
     });
   };
 
   const handleRejectFix = () => {
-    rejectFix((code: string) => {
-      setCode(code);
+    rejectFix((originalCode: string) => {
+      updateActiveFile({ code: originalCode });
     });
   };
 
@@ -446,7 +537,7 @@ export default function Home() {
                 <h2 className="text-xl font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => window.open(window.location.href, '_blank')}
+                    onClick={createNewFile}
                     className="p-3 transition-all duration-200"
                     style={{
                       color: 'var(--foreground)'
@@ -519,74 +610,106 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-              {/* Minimal File Header */}
-              <div className="mb-2">
-                <div
-                  className="inline-flex items-center gap-2 px-2 py-1 rounded-md"
-                  style={{
-                    backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
-                    border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
-                  }}
-                >
-                  {isEditingFilename ? (
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        value={editingName}
-                        onChange={(e) => handleEditingNameChange(e.target.value)}
-                        onBlur={handleFinishEditing}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleFinishEditing();
-                          } else if (e.key === 'Escape') {
-                            setIsEditingFilename(false);
-                            setEditingName('');
-                          }
-                        }}
-                        className="bg-transparent text-xs font-medium outline-none min-w-0"
-                        style={{ color: 'var(--foreground)' }}
-                        autoFocus
-                        onFocus={(e) => e.target.select()}
-                      />
-                      <span className="text-xs font-medium opacity-60" style={{ color: 'var(--foreground)' }}>
-                        .{getFileExtension(language)}
-                      </span>
-                    </div>
-                  ) : (
+              {/* Minimal Tabs attached to code editor */}
+              <div className="flex-1 min-h-[300px] flex flex-col">
+                {/* Tabs */}
+                <div className="flex items-center overflow-x-auto scrollbar-hide">
+                  {files.map((file) => (
                     <div
-                      className="flex items-center gap-1 group cursor-pointer"
-                      onClick={handleStartEditing}
+                      key={file.id}
+                      className={`flex items-center gap-2 px-3 py-2 cursor-pointer group min-w-0 rounded-t-md transition-all duration-200 ${file.id === activeFileId
+                        ? 'shadow-sm'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
+                      style={{
+                        boxShadow: file.id === activeFileId
+                          ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                          : 'none'
+                      }}
+                      onClick={() => switchToFile(file.id)}
                     >
-                      <span className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>
-                        <span>{getFilenameWithoutExtension(filename)}</span>
-                        <span className="opacity-60">.{getFileExtension(language)}</span>
-                      </span>
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="opacity-0 group-hover:opacity-60 transition-opacity"
-                        style={{ color: 'var(--foreground)' }}
-                      >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              </div>
+                      {/* File Icon */}
+                      <div className="flex-shrink-0">
+                        <i
+                          className={getLanguageIcon(file.language)}
+                          style={{
+                            fontSize: '14px',
+                            color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                          }}
+                        ></i>
+                      </div>
 
-              <div className="flex-1 min-h-[300px]">
-                <CodeEditor
-                  value={code}
-                  onChange={(value) => setCode(value || '')}
-                  language={language}
-                  suggestedCode={suggestedCode || undefined}
-                  showDiff={showDiff}
-                  onApplyDiff={handleApplyFix}
-                  onRejectDiff={handleRejectFix}
-                />
+                      {/* Filename */}
+                      {isEditingFilename && file.id === activeFileId ? (
+                        <div className="flex items-center min-w-0">
+                          <input
+                            type="text"
+                            value={editingName}
+                            onChange={(e) => handleEditingNameChange(e.target.value)}
+                            onBlur={handleFinishEditing}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleFinishEditing();
+                              } else if (e.key === 'Escape') {
+                                setIsEditingFilename(false);
+                                setEditingName('');
+                              }
+                            }}
+                            className="bg-transparent text-xs font-medium outline-none min-w-0 flex-1"
+                            style={{ color: 'var(--foreground)' }}
+                            autoFocus
+                            onFocus={(e) => e.target.select()}
+                          />
+                          <span className="text-xs font-medium opacity-60 flex-shrink-0" style={{ color: 'var(--foreground)' }}>
+                            .{getFileExtension(file.language)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span
+                          className="text-xs font-medium truncate min-w-0 flex-1"
+                          style={{ color: 'var(--foreground)' }}
+                          onDoubleClick={() => file.id === activeFileId && handleStartEditing()}
+                        >
+                          <span>{getFilenameWithoutExtension(file.filename)}</span>
+                          <span className="opacity-60">.{getFileExtension(file.language)}</span>
+                          {file.isModified && <span className="ml-1 opacity-80">•</span>}
+                        </span>
+                      )}
+
+                      {/* Close Button */}
+                      {files.length > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closeFile(file.id);
+                          }}
+                          className="flex-shrink-0 opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity p-1"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Code Editor */}
+                <div className="flex-1 rounded-b-md overflow-hidden shadow-md" style={{
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                }}>
+                  <CodeEditor
+                    value={code}
+                    onChange={handleCodeChange}
+                    language={language}
+                    suggestedCode={suggestedCode || undefined}
+                    showDiff={showDiff}
+                    onApplyDiff={handleApplyFix}
+                    onRejectDiff={handleRejectFix}
+                  />
+                </div>
               </div>
             </div>
           }

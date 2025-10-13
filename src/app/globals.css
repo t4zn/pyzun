@@ -250,3 +250,71 @@ input, textarea {
 .monaco-editor.vs-dark .diff-inline-added {
   background-color: rgba(34, 197, 94, 0.15) !important;
 }
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove Monaco Editor borders */
+.monaco-editor {
+  border: none !important;
+}
+
+.monaco-editor .monaco-editor-background {
+  border: none !important;
+}
+
+.monaco-editor .overflow-guard {
+  border: none !important;
+}
+
+.monaco-editor .decorationsOverviewRuler {
+  border: none !important;
+}
+
+.monaco-editor .margin {
+  border: none !important;
+}
+
+.monaco-editor .lines-content {
+  border: none !important;
+}
+
+.monaco-editor .view-overlays {
+  border: none !important;
+}
+
+.monaco-editor .view-lines {
+  border: none !important;
+}
+
+/* Remove all corner borders and outlines */
+* {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Specifically target common border elements */
+body, html, div, main, section, article, aside, header, footer, nav {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove any potential container borders */
+.container, .wrapper, .main, .content {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove focus outlines that might appear as borders */
+*:focus, *:focus-visible, *:focus-within {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}

@@ -10,41 +10,41 @@ interface LanguageSelectorProps {
 }
 
 const languages = [
-  { value: 'assembly', label: 'Assembly', id: 45 },
-  { value: 'bash', label: 'Bash', id: 46 },
-  { value: 'basic', label: 'Basic', id: 47 },
-  { value: 'c', label: 'C', id: 50 },
-  { value: 'cpp', label: 'C++', id: 54 },
-  { value: 'csharp', label: 'C#', id: 51 },
-  { value: 'clojure', label: 'Clojure', id: 86 },
-  { value: 'cobol', label: 'COBOL', id: 77 },
-  { value: 'd', label: 'D', id: 56 },
-  { value: 'elixir', label: 'Elixir', id: 57 },
-  { value: 'erlang', label: 'Erlang', id: 58 },
-  { value: 'fortran', label: 'Fortran', id: 59 },
-  { value: 'go', label: 'Go', id: 60 },
-  { value: 'haskell', label: 'Haskell', id: 61 },
-  { value: 'java', label: 'Java', id: 62 },
-  { value: 'javascript', label: 'JavaScript', id: 63 },
-  { value: 'kotlin', label: 'Kotlin', id: 78 },
-  { value: 'lisp', label: 'Lisp', id: 55 },
-  { value: 'lua', label: 'Lua', id: 64 },
-  { value: 'objective_c', label: 'Objective-C', id: 79 },
-  { value: 'ocaml', label: 'OCaml', id: 65 },
-  { value: 'octave', label: 'Octave', id: 66 },
-  { value: 'pascal', label: 'Pascal', id: 67 },
-  { value: 'perl', label: 'Perl', id: 85 },
-  { value: 'php', label: 'PHP', id: 68 },
-  { value: 'prolog', label: 'Prolog', id: 69 },
-  { value: 'python', label: 'Python', id: 71 },
-  { value: 'r', label: 'R', id: 80 },
-  { value: 'ruby', label: 'Ruby', id: 72 },
-  { value: 'rust', label: 'Rust', id: 73 },
-  { value: 'scala', label: 'Scala', id: 81 },
-  { value: 'sql', label: 'SQL', id: 82 },
-  { value: 'swift', label: 'Swift', id: 83 },
-  { value: 'typescript', label: 'TypeScript', id: 74 },
-  { value: 'visual_basic', label: 'Visual Basic', id: 84 }
+  { value: 'assembly', label: 'Assembly', id: 45, icon: 'devicon-assembly-plain' },
+  { value: 'bash', label: 'Bash', id: 46, icon: 'devicon-bash-plain' },
+  { value: 'basic', label: 'Basic', id: 47, icon: 'devicon-basic-plain' },
+  { value: 'c', label: 'C', id: 50, icon: 'devicon-c-plain' },
+  { value: 'cpp', label: 'C++', id: 54, icon: 'devicon-cplusplus-plain' },
+  { value: 'csharp', label: 'C#', id: 51, icon: 'devicon-csharp-plain' },
+  { value: 'clojure', label: 'Clojure', id: 86, icon: 'devicon-clojure-plain' },
+  { value: 'cobol', label: 'COBOL', id: 77, icon: 'devicon-cobol-plain' },
+  { value: 'd', label: 'D', id: 56, icon: 'devicon-d-plain' },
+  { value: 'elixir', label: 'Elixir', id: 57, icon: 'devicon-elixir-plain' },
+  { value: 'erlang', label: 'Erlang', id: 58, icon: 'devicon-erlang-plain' },
+  { value: 'fortran', label: 'Fortran', id: 59, icon: 'devicon-fortran-plain' },
+  { value: 'go', label: 'Go', id: 60, icon: 'devicon-go-plain' },
+  { value: 'haskell', label: 'Haskell', id: 61, icon: 'devicon-haskell-plain' },
+  { value: 'java', label: 'Java', id: 62, icon: 'devicon-java-plain' },
+  { value: 'javascript', label: 'JavaScript', id: 63, icon: 'devicon-javascript-plain' },
+  { value: 'kotlin', label: 'Kotlin', id: 78, icon: 'devicon-kotlin-plain' },
+  { value: 'lisp', label: 'Lisp', id: 55, icon: 'devicon-lisp-plain' },
+  { value: 'lua', label: 'Lua', id: 64, icon: 'devicon-lua-plain' },
+  { value: 'objective_c', label: 'Objective-C', id: 79, icon: 'devicon-objectivec-plain' },
+  { value: 'ocaml', label: 'OCaml', id: 65, icon: 'devicon-ocaml-plain' },
+  { value: 'octave', label: 'Octave', id: 66, icon: 'devicon-octave-plain' },
+  { value: 'pascal', label: 'Pascal', id: 67, icon: 'devicon-pascal-plain' },
+  { value: 'perl', label: 'Perl', id: 85, icon: 'devicon-perl-plain' },
+  { value: 'php', label: 'PHP', id: 68, icon: 'devicon-php-plain' },
+  { value: 'prolog', label: 'Prolog', id: 69, icon: 'devicon-prolog-plain' },
+  { value: 'python', label: 'Python', id: 71, icon: 'devicon-python-plain' },
+  { value: 'r', label: 'R', id: 80, icon: 'devicon-r-plain' },
+  { value: 'ruby', label: 'Ruby', id: 72, icon: 'devicon-ruby-plain' },
+  { value: 'rust', label: 'Rust', id: 73, icon: 'devicon-rust-plain' },
+  { value: 'scala', label: 'Scala', id: 81, icon: 'devicon-scala-plain' },
+  { value: 'sql', label: 'SQL', id: 82, icon: 'devicon-mysql-plain' },
+  { value: 'swift', label: 'Swift', id: 83, icon: 'devicon-swift-plain' },
+  { value: 'typescript', label: 'TypeScript', id: 74, icon: 'devicon-typescript-plain' },
+  { value: 'visual_basic', label: 'Visual Basic', id: 84, icon: 'devicon-visualbasic-plain' }
 ];
 
 export default function LanguageSelector({ language, onChange }: LanguageSelectorProps) {
@@ -93,7 +93,12 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
           color: 'var(--foreground)'
         }}
       >
-        <span>{selectedLanguage?.label || 'Select Language'}</span>
+        <div className="flex items-center gap-2">
+          {selectedLanguage && (
+            <i className={selectedLanguage.icon} style={{ fontSize: '16px' }}></i>
+          )}
+          <span>{selectedLanguage?.label || 'Select Language'}</span>
+        </div>
         <svg 
           width="12" 
           height="12" 
@@ -137,13 +142,14 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
                 <button
                   key={lang.value}
                   onClick={() => handleSelect(lang.value)}
-                  className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1"
+                  className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2"
                   style={{
                     backgroundColor: lang.value === language ? 'var(--foreground)' : 'var(--background)',
                     color: lang.value === language ? 'var(--background)' : 'var(--foreground)'
                   }}
                 >
-                  {lang.label}
+                  <i className={lang.icon} style={{ fontSize: '16px' }}></i>
+                  <span>{lang.label}</span>
                 </button>
               ))
             ) : (
@@ -159,3 +165,8 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
 }
 
 export { languages };
+
+export const getLanguageIcon = (languageValue: string): string => {
+  const lang = languages.find(l => l.value === languageValue);
+  return lang?.icon || 'devicon-plain-wordmark';
+};
