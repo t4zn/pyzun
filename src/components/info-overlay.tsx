@@ -24,7 +24,7 @@ export default function InfoOverlay() {
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="text-gray-800 dark:text-white group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
+          className="info-icon"
         >
           <circle
             cx="12"
