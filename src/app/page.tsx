@@ -607,6 +607,15 @@ export default function Home() {
     CustomLanguageService.saveLanguage(language);
     setCustomLanguages(CustomLanguageService.getLanguages());
     setCustomLanguagesRefresh(prev => prev + 1);
+    
+    // Generate the language ID the same way the service does
+    const languageId = `custom_${language.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    
+    // Automatically switch to the newly created custom language
+    handleLanguageChange(languageId);
+    
+    // Close the custom language creator modal
+    setShowCustomLanguageCreator(false);
   };
 
   const handleViewLanguage = (languageId: string) => {
