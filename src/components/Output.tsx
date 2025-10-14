@@ -14,6 +14,7 @@ interface OutputProps {
   stdin?: string;
   onStdinChange?: (value: string) => void;
   code?: string;
+  onClear?: () => void;
 }
 
 export default function Output({
@@ -26,7 +27,8 @@ export default function Output({
   isFixingCode = false,
   stdin = '',
   onStdinChange,
-  code = ''
+  code = '',
+  onClear
 }: OutputProps) {
   const { theme } = useTheme();
   const formatExecutionTime = (time: number | null) => {
@@ -58,7 +60,25 @@ export default function Output({
     <div className="h-full flex flex-col" style={{ backgroundColor: 'var(--background)' }}>
       <div className="p-2 sm:p-3 lg:p-4 xl:p-6 pb-2 sm:pb-3 lg:pb-4" style={{ backgroundColor: 'var(--background)' }}>
         <div className="flex items-center justify-between">
-          <div className="text-base sm:text-lg lg:text-xl font-light" style={{ color: 'var(--foreground)' }}>Output</div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="text-base sm:text-lg lg:text-xl font-light" style={{ color: 'var(--foreground)' }}>Output</div>
+            {onClear && (output || error) && !isLoading && (
+              <button
+                onClick={onClear}
+                className="p-1 hover:opacity-70 transition-opacity"
+                style={{ color: 'var(--foreground)' }}
+                title="Clear output"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c0-1 1-2 2-2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+              </button>
+            )}
+          </div>
           {showStats && (
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 text-xs font-mono opacity-60" style={{ color: 'var(--foreground)' }}>
               {executionTime !== null && (

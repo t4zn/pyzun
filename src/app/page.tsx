@@ -556,6 +556,14 @@ export default function Home() {
     });
   };
 
+  const handleClear = () => {
+    updateActiveFile({
+      output: '',
+      error: '',
+      executionStats: { time: null, memory: null }
+    });
+  };
+
   const getFileExtension = (lang: string): string => {
     // Check if it's a custom language
     if (CustomLanguageService.isCustomLanguage(lang)) {
@@ -1035,6 +1043,7 @@ export default function Home() {
                 stdin={stdin}
                 onStdinChange={setStdin}
                 code={code}
+                onClear={handleClear}
               />
             </div>
           </div>
@@ -1354,6 +1363,7 @@ export default function Home() {
                       stdin={stdin}
                       onStdinChange={setStdin}
                       code={code}
+                      onClear={handleClear}
                     />
                   </div>
                 </div>
@@ -1695,6 +1705,7 @@ export default function Home() {
                     stdin={stdin}
                     onStdinChange={setStdin}
                     code={code}
+                    onClear={handleClear}
                   />
                 </div>
               </div>
