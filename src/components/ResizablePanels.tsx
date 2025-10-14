@@ -27,17 +27,19 @@ export default function ResizablePanels({
 
       const containerRect = containerRef.current.getBoundingClientRect();
       const newLeftWidth = ((clientX - containerRect.left) / containerRect.width) * 100;
-      
+
       // Clamp the width between min and max values
       const clampedWidth = Math.min(Math.max(newLeftWidth, minLeftWidth), maxLeftWidth);
       setLeftWidth(clampedWidth);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
       handleMove(e.clientX);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
       if (e.touches.length > 0) {
         handleMove(e.touches[0].clientX);
       }
@@ -48,12 +50,14 @@ export default function ResizablePanels({
     };
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mousemove', handleMouseMove, { passive: false });
       document.addEventListener('mouseup', handleEnd);
       document.addEventListener('touchmove', handleTouchMove, { passive: false });
       document.addEventListener('touchend', handleEnd);
+      document.addEventListener('touchcancel', handleEnd);
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
+      document.body.style.touchAction = 'none';
     }
 
     return () => {
@@ -61,8 +65,10 @@ export default function ResizablePanels({
       document.removeEventListener('mouseup', handleEnd);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleEnd);
+      document.removeEventListener('touchcancel', handleEnd);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      document.body.style.touchAction = '';
     };
   }, [isDragging, minLeftWidth, maxLeftWidth]);
 
@@ -77,7 +83,7 @@ export default function ResizablePanels({
   return (
     <div ref={containerRef} className="flex h-full">
       {/* Left Panel */}
-      <div 
+      <div
         style={{ width: `${leftWidth}%` }}
         className="flex-shrink-0 min-w-0"
       >
@@ -89,23 +95,22 @@ export default function ResizablePanels({
         className="resize-handle-visible flex-shrink-0 group flex items-center justify-center touch-none transition-all duration-200"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        style={{ 
+        style={{
           width: '16px',
           cursor: 'col-resize',
           minHeight: '100%',
-          display: 'flex !important',
-          visibility: 'visible !important',
-          opacity: '1 !important',
-          backgroundColor: 'transparent'
+          backgroundColor: 'transparent',
+          touchAction: 'none',
+          userSelect: 'none'
         }}
       >
-        <div 
+        <div
           className="flex flex-col gap-1 transition-opacity duration-200"
           style={{
             opacity: isDragging ? 1 : 0.4
           }}
         >
-          <div 
+          <div
             style={{
               width: '5px',
               height: '5px',
@@ -113,7 +118,7 @@ export default function ResizablePanels({
               borderRadius: '50%'
             }}
           />
-          <div 
+          <div
             style={{
               width: '5px',
               height: '5px',
@@ -121,7 +126,7 @@ export default function ResizablePanels({
               borderRadius: '50%'
             }}
           />
-          <div 
+          <div
             style={{
               width: '5px',
               height: '5px',
@@ -129,7 +134,7 @@ export default function ResizablePanels({
               borderRadius: '50%'
             }}
           />
-          <div 
+          <div
             style={{
               width: '5px',
               height: '5px',
@@ -141,7 +146,7 @@ export default function ResizablePanels({
       </div>
 
       {/* Right Panel */}
-      <div 
+      <div
         style={{ width: `${100 - leftWidth}%` }}
         className="flex-shrink-0 min-w-0"
       >
