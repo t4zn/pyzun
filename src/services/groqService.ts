@@ -19,13 +19,14 @@ export async function fixCodeWithAI(code: string, error: string, language: strin
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `API error: ${response.status}`);
+      // Pass through user-friendly error messages from the API
+      throw new Error(errorData.error || `Service temporarily unavailable. Please try again later.`);
     }
 
     const data: FixCodeResponse = await response.json();
     
     if (!data.fixedCode) {
-      throw new Error('No code suggestion received from AI');
+      throw new Error('AI service could not generate a code suggestion. Please try again.');
     }
 
     return data.fixedCode;

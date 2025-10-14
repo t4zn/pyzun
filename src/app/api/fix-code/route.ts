@@ -59,8 +59,19 @@ Fix the code and return ONLY the corrected code. Do not include any explanations
 
     if (!response.ok) {
       const errorText = await response.text();
+      
+      // Handle rate limit errors with user-friendly messages
+      if (response.status === 429 || response.status === 403 || 
+          errorText.toLowerCase().includes('rate limit') || 
+          errorText.toLowerCase().includes('quota')) {
+        return NextResponse.json(
+          { error: 'Too many users are currently using the AI code fix feature. Please try again in a few minutes.' },
+          { status: 429 }
+        );
+      }
+      
       return NextResponse.json(
-        { error: `GROQ API error: ${response.status} ${errorText}` },
+        { error: `AI service temporarily unavailable. Please try again later.` },
         { status: response.status }
       );
     }
@@ -70,7 +81,7 @@ Fix the code and return ONLY the corrected code. Do not include any explanations
     
     if (!fixedCode) {
       return NextResponse.json(
-        { error: 'No code suggestion received from AI' },
+        { error: 'AI could not generate a code suggestion. Please try again or check your code manually.' },
         { status: 500 }
       );
     }
@@ -90,7 +101,7 @@ Fix the code and return ONLY the corrected code. Do not include any explanations
   } catch (error) {
     console.error('Error in fix-code API:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'AI code fix service is temporarily unavailable. Please try again later.' },
       { status: 500 }
     );
   }
