@@ -110,7 +110,7 @@ export default function Output({
               }}
             />
             <div className="text-xs opacity-60 mt-1" style={{ color: 'var(--foreground)' }}>
-              Tip: Enter each input value on a new line. Press Shift+Enter for line breaks within a value.
+              Tip: Enter each input value on a new line.
             </div>
           </div>
         )}

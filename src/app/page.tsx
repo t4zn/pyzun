@@ -643,7 +643,7 @@ export default function Home() {
     try {
       await navigator.clipboard.writeText(code);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Show tick for 2 seconds
+      setTimeout(() => setIsCopied(false), 2500); // Show tick for 2.5 seconds
     } catch (err) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -653,7 +653,7 @@ export default function Home() {
       document.execCommand('copy');
       document.body.removeChild(textArea);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Show tick for 2 seconds
+      setTimeout(() => setIsCopied(false), 2500); // Show tick for 2.5 seconds
     }
   };
 
@@ -765,16 +765,42 @@ export default function Home() {
                     }}
                     aria-label="Copy code"
                   >
-                    {isCopied ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                        <polyline points="20,6 9,17 4,12" />
-                      </svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                      </svg>
-                    )}
+                    <div className="relative transition-all duration-300 ease-in-out">
+                      {isCopied ? (
+                        <svg 
+                          width="16" 
+                          height="16" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2.5" 
+                          className="animate-bounce-in"
+                          style={{ color: '#fbbf24' }}
+                        >
+                          <polyline 
+                            points="20,6 9,17 4,12" 
+                            style={{
+                              strokeDasharray: '20',
+                              strokeDashoffset: '20',
+                              animation: 'draw 0.4s ease-out 0.1s forwards'
+                            }}
+                          />
+                        </svg>
+                      ) : (
+                        <svg 
+                          width="16" 
+                          height="16" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          className="transition-all duration-200 ease-out transform hover:scale-110 hover:rotate-3"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" className="transition-all duration-200" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" className="transition-all duration-200" />
+                        </svg>
+                      )}
+                    </div>
                   </button>
                   <button
                     onClick={handleDownloadCode}
@@ -1057,16 +1083,42 @@ export default function Home() {
                         }}
                         aria-label="Copy code"
                       >
-                        {isCopied ? (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                            <polyline points="20,6 9,17 4,12" />
-                          </svg>
-                        ) : (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                          </svg>
-                        )}
+                        <div className="relative transition-all duration-300 ease-in-out">
+                          {isCopied ? (
+                            <svg 
+                              width="18" 
+                              height="18" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2.5" 
+                              className="animate-bounce-in"
+                              style={{ color: '#fbbf24' }}
+                            >
+                              <polyline 
+                                points="20,6 9,17 4,12" 
+                                style={{
+                                  strokeDasharray: '20',
+                                  strokeDashoffset: '20',
+                                  animation: 'draw 0.4s ease-out 0.1s forwards'
+                                }}
+                              />
+                            </svg>
+                          ) : (
+                            <svg 
+                              width="18" 
+                              height="18" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2" 
+                              className="transition-all duration-200 ease-out transform hover:scale-110 hover:rotate-3"
+                            >
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" className="transition-all duration-200" />
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" className="transition-all duration-200" />
+                            </svg>
+                          )}
+                        </div>
                       </button>
                       <button
                         onClick={handleDownloadCode}
@@ -1354,16 +1406,42 @@ export default function Home() {
                       }}
                       aria-label="Copy code"
                     >
-                      {isCopied ? (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                          <polyline points="20,6 9,17 4,12" />
-                        </svg>
-                      ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                      )}
+                      <div className="relative transition-all duration-300 ease-in-out">
+                        {isCopied ? (
+                          <svg 
+                            width="20" 
+                            height="20" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2.5" 
+                            className="animate-bounce-in"
+                            style={{ color: '#fbbf24' }}
+                          >
+                            <polyline 
+                              points="20,6 9,17 4,12" 
+                              style={{
+                                strokeDasharray: '20',
+                                strokeDashoffset: '20',
+                                animation: 'draw 0.4s ease-out 0.1s forwards'
+                              }}
+                            />
+                          </svg>
+                        ) : (
+                          <svg 
+                            width="20" 
+                            height="20" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            className="transition-all duration-200 ease-out transform hover:scale-110 hover:rotate-3"
+                          >
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" className="transition-all duration-200" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" className="transition-all duration-200" />
+                          </svg>
+                        )}
+                      </div>
                     </button>
                     <button
                       onClick={handleDownloadCode}
