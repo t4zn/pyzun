@@ -72,11 +72,13 @@ export default function ResizablePanels({
     };
   }, [isDragging, minLeftWidth, maxLeftWidth]);
 
-  const handleMouseDown = () => {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     setIsDragging(true);
   };
 
-  const handleTouchStart = () => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
     setIsDragging(true);
   };
 
@@ -92,7 +94,7 @@ export default function ResizablePanels({
 
       {/* Resizer */}
       <div
-        className="resize-handle-visible flex-shrink-0 group flex items-center justify-center touch-none transition-all duration-200"
+        className="resize-handle-visible flex-shrink-0 group flex items-center justify-center touch-none transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         style={{
@@ -107,39 +109,43 @@ export default function ResizablePanels({
         <div
           className="flex flex-col gap-1 transition-opacity duration-200"
           style={{
-            opacity: isDragging ? 1 : 0.4
+            opacity: isDragging ? 1 : 0.6
           }}
         >
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '4px',
+              height: '4px',
               backgroundColor: 'var(--foreground)',
-              borderRadius: '50%'
+              borderRadius: '50%',
+              opacity: 0.7
             }}
           />
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '4px',
+              height: '4px',
               backgroundColor: 'var(--foreground)',
-              borderRadius: '50%'
+              borderRadius: '50%',
+              opacity: 0.7
             }}
           />
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '4px',
+              height: '4px',
               backgroundColor: 'var(--foreground)',
-              borderRadius: '50%'
+              borderRadius: '50%',
+              opacity: 0.7
             }}
           />
           <div
             style={{
-              width: '5px',
-              height: '5px',
+              width: '4px',
+              height: '4px',
               backgroundColor: 'var(--foreground)',
-              borderRadius: '50%'
+              borderRadius: '50%',
+              opacity: 0.7
             }}
           />
         </div>

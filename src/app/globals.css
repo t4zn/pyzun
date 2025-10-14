@@ -465,11 +465,6 @@ html {
   width: 0 !important;
 }
 
-/* Hide resizer/divider elements that might create vertical lines, but not our custom resize handle */
-.cursor-col-resize:not(.resize-handle-visible) {
-  display: none !important;
-}
-
 /* Ensure our resize handle is always visible */
 .resize-handle-visible {
   display: flex !important;
@@ -486,24 +481,6 @@ html {
 
 .resize-handle-visible:active .flex-col {
   opacity: 1 !important;
-}
-
-/* Hide any resizer dots or indicators */
-.cursor-col-resize .flex-col {
-  display: none !important;
-}
-
-/* Remove any potential panel dividers */
-.panel-divider, .resize-handle, .splitter-layout > .layout-splitter {
-  display: none !important;
-}
-
-/* Force hide any element that might be creating the right border */
-div[style*="cursor: col-resize"], 
-div[class*="resize"], 
-div[class*="splitter"],
-div[class*="divider"] {
-  display: none !important;
 }
 
 /* Ensure panels take full width without gaps */
