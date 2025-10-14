@@ -588,4 +588,27 @@ o overlay icon styles */
   .text-xl {
     font-size: 1.125rem !important;
   }
+}/* Ba
+ckdrop blur support */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Ensure backdrop blur works on all browsers */
+@supports not (backdrop-filter: blur(4px)) {
+  .backdrop-blur-sm {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+}/* Cu
+stom keyword highlighting - same color as Python keywords */
+.custom-keyword-highlight {
+  color: #0000ff !important; /* Blue color for light theme, same as Python keywords */
+}
+
+/* Dark theme custom keyword highlighting */
+@media (prefers-color-scheme: dark) {
+  .custom-keyword-highlight {
+    color: #569cd6 !important; /* Light blue color for dark theme, same as Python keywords */
+  }
 }

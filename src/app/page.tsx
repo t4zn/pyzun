@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
 import LanguageSelector, { getLanguageIcon, isOmIcon, isLispIcon, isAssemblyIcon, isBasicIcon } from '../components/LanguageSelector';
@@ -10,6 +10,10 @@ import { useJudge0 } from '../hooks/useJudge0';
 import { useAICodeFix } from '../hooks/useAICodeFix';
 import { useTheme } from '../components/ThemeProvider';
 import InfoOverlay from '../components/info-overlay';
+import CustomLanguageCreator from '../components/CustomLanguageCreator';
+import CustomLanguagesDropdown from '../components/CustomLanguagesDropdown';
+import KeywordTranslationsViewer from '../components/KeywordTranslationsViewer';
+import CustomLanguageService, { CustomLanguage } from '../services/customLanguageService';
 
 
 
@@ -231,6 +235,12 @@ interface FileTab {
 
 export default function Home() {
   const getDefaultFilename = (lang: string) => {
+    // Check if it's a custom language
+    if (CustomLanguageService.isCustomLanguage(lang)) {
+      const customLang = CustomLanguageService.getCustomLanguage(lang);
+      return customLang ? `main.${customLang.extension}` : 'main.txt';
+    }
+
     const defaults: Record<string, string> = {
       assembly: 'main.asm',
       bash: 'script.sh',
@@ -272,6 +282,11 @@ export default function Home() {
     return defaults[lang] || 'main.txt';
   };
 
+  // Load custom languages on mount
+  useEffect(() => {
+    setCustomLanguages(CustomLanguageService.getLanguages());
+  }, []);
+
   // Initialize with one default file
   const [files, setFiles] = useState<FileTab[]>([
     {
@@ -289,6 +304,11 @@ export default function Home() {
   const [isEditingFilename, setIsEditingFilename] = useState(false);
   const [editingName, setEditingName] = useState('');
   const [stdin, setStdin] = useState('');
+  const [showCustomLanguageCreator, setShowCustomLanguageCreator] = useState(false);
+  const [showKeywordViewer, setShowKeywordViewer] = useState(false);
+  const [viewingLanguage, setViewingLanguage] = useState<string>('');
+  const [customLanguages, setCustomLanguages] = useState<Record<string, CustomLanguage>>({});
+  const [customLanguagesRefresh, setCustomLanguagesRefresh] = useState(0);
 
   // Get current active file
   const activeFile = files.find(f => f.id === activeFileId) || files[0];
@@ -315,7 +335,17 @@ export default function Home() {
 
   const handleLanguageChange = (newLanguage: string) => {
     const newFilename = getDefaultFilename(newLanguage);
-    const newCode = defaultCode[newLanguage] || '// Write your code here';
+    let newCode = '// Write your code here';
+
+    // Check if it's a custom language
+    if (CustomLanguageService.isCustomLanguage(newLanguage)) {
+      const customLang = CustomLanguageService.getCustomLanguage(newLanguage);
+      if (customLang) {
+        newCode = CustomLanguageService.getDefaultCode(customLang);
+      }
+    } else {
+      newCode = defaultCode[newLanguage] || '// Write your code here';
+    }
 
     updateActiveFile({
       language: newLanguage,
@@ -470,6 +500,23 @@ export default function Home() {
       });
 
       setSanskritLoading(false);
+    } else if (CustomLanguageService.isCustomLanguage(language)) {
+      // Handle custom language execution
+      const customLang = CustomLanguageService.getCustomLanguage(language);
+      if (customLang) {
+        const translatedCode = CustomLanguageService.translateCode(code, customLang);
+        const result = await executeCode(translatedCode, 'python', stdin);
+
+        // Update current file's output
+        updateActiveFile({
+          output: result.output,
+          error: result.error,
+          executionStats: {
+            time: result.executionTime,
+            memory: result.memoryUsed
+          }
+        });
+      }
     } else {
       // Use Judge0 for other languages
       const result = await executeCode(code, language, stdin);
@@ -509,6 +556,12 @@ export default function Home() {
   };
 
   const getFileExtension = (lang: string): string => {
+    // Check if it's a custom language
+    if (CustomLanguageService.isCustomLanguage(lang)) {
+      const customLang = CustomLanguageService.getCustomLanguage(lang);
+      return customLang?.extension || 'txt';
+    }
+
     const extensionMap: Record<string, string> = {
       assembly: 'asm',
       bash: 'sh',
@@ -550,6 +603,32 @@ export default function Home() {
     return extensionMap[lang] || 'txt';
   };
 
+  const handleCreateCustomLanguage = (language: CustomLanguage) => {
+    CustomLanguageService.saveLanguage(language);
+    setCustomLanguages(CustomLanguageService.getLanguages());
+    setCustomLanguagesRefresh(prev => prev + 1);
+  };
+
+  const handleViewLanguage = (languageId: string) => {
+    setViewingLanguage(languageId);
+    setShowKeywordViewer(true);
+  };
+
+  const handleDeleteLanguage = (languageId: string) => {
+    CustomLanguageService.deleteLanguage(languageId);
+    setCustomLanguages(CustomLanguageService.getLanguages());
+    setCustomLanguagesRefresh(prev => prev + 1);
+    
+    // If the deleted language is currently active, switch to Python
+    if (language === languageId) {
+      handleLanguageChange('python');
+    }
+  };
+
+  const isCustomLanguage = (languageId: string) => {
+    return CustomLanguageService.isCustomLanguage(languageId);
+  };
+
   const handleDownloadCode = () => {
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -574,7 +653,17 @@ export default function Home() {
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-medium tracking-wide" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-league-spartan), sans-serif' }}>Pyzun</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-            <LanguageSelector language={language} onChange={handleLanguageChange} />
+            <LanguageSelector 
+              language={language} 
+              onChange={handleLanguageChange}
+            />
+            <CustomLanguagesDropdown
+              onSelectLanguage={handleLanguageChange}
+              onCreateNew={() => setShowCustomLanguageCreator(true)}
+              onViewLanguage={handleViewLanguage}
+              onDeleteLanguage={handleDeleteLanguage}
+              refreshTrigger={customLanguagesRefresh}
+            />
             <button
               onClick={toggleTheme}
               className="p-2 sm:p-3 transition-all duration-200"
@@ -606,253 +695,269 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="h-[calc(100vh-73px)] sm:h-[calc(100vh-89px)]">
-        {/* Mobile Layout - Stack vertically */}
-        <div className="lg:hidden h-full flex flex-col">
-          {/* Editor Section */}
-          <div className="flex-1 min-h-0 flex flex-col p-4 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={createNewFile}
-                  className="p-2 transition-all duration-200"
-                  style={{
-                    color: 'var(--foreground)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.7';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  aria-label="New file"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                </button>
-                <button
-                  onClick={handleDownloadCode}
-                  className="p-2 transition-all duration-200"
-                  style={{
-                    color: 'var(--foreground)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.7';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  aria-label="Download code"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7,10 12,15 17,10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                </button>
-                <button
-                  onClick={handleRunCode}
-                  disabled={isLoading}
-                  className="p-2 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    color: 'var(--foreground)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isLoading) {
-                      e.currentTarget.style.opacity = '0.7';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isLoading) {
-                      e.currentTarget.style.opacity = '1';
-                    }
-                  }}
-                  aria-label={isLoading ? 'Running code...' : 'Run code'}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center w-4 h-4">
-                      <span className="inline-flex">
-                        <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></span>
-                        <span className="w-1 h-1 bg-current rounded-full animate-pulse mx-0.5" style={{ animationDelay: '200ms' }}></span>
-                        <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></span>
-                      </span>
-                    </div>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
-                      <polygon points="5,3 19,12 5,21" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 min-h-0 flex flex-col">
-              {/* Tabs */}
-              <div className="flex items-center overflow-x-auto scrollbar-hide">
-                {files.map((file) => (
-                  <div
-                    key={file.id}
-                    className={`flex items-center gap-2 px-2 py-2 cursor-pointer group min-w-0 rounded-t-md transition-all duration-200 ${file.id === activeFileId
-                      ? 'shadow-sm'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
-                    style={{
-                      backgroundColor: file.id === activeFileId && theme === 'dark' ? '#1e1e1e' : 'transparent',
-                      boxShadow: file.id === activeFileId
-                        ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                        : 'none'
-                    }}
-                    onClick={() => switchToFile(file.id)}
-                  >
-                    {/* File Icon */}
-                    <div className="flex-shrink-0">
-                      {isOmIcon(getLanguageIcon(file.language)) ? (
-                        <span
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
-                          }}
-                        >
-                          ॐ
-                        </span>
-                      ) : isLispIcon(getLanguageIcon(file.language)) ? (
-                        <img
-                          src="/lisp.png"
-                          alt="Lisp"
-                          style={{
-                            width: '12px',
-                            height: '12px',
-                            filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
-                          }}
-                        />
-                      ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
-                        <img
-                          src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
-                          alt="Assembly"
-                          style={{
-                            width: '14px',
-                            height: '14px',
-                            filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
-                          }}
-                        />
-                      ) : isBasicIcon(getLanguageIcon(file.language)) ? (
-                        <img
-                          src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
-                          alt="Basic"
-                          style={{
-                            width: '10px',
-                            height: '10px',
-                            filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
-                          }}
-                        />
+        {/* Mobile Layout - Resizable panels */}
+        <div className="lg:hidden h-full">
+          <ResizablePanels
+            defaultLeftWidth={60}
+            minLeftWidth={30}
+            maxLeftWidth={80}
+            leftPanel={
+              <div className="h-full flex flex-col p-4 animate-slide-in" style={{ backgroundColor: 'var(--background)' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-light" style={{ color: 'var(--foreground)' }}>Editor</h2>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={createNewFile}
+                      className="p-2 transition-all duration-200"
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                      aria-label="New file"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleDownloadCode}
+                      className="p-2 transition-all duration-200"
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '0.7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                      aria-label="Download code"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleRunCode}
+                      disabled={isLoading}
+                      className="p-2 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isLoading) {
+                          e.currentTarget.style.opacity = '0.7';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isLoading) {
+                          e.currentTarget.style.opacity = '1';
+                        }
+                      }}
+                      aria-label={isLoading ? 'Running code...' : 'Run code'}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center w-4 h-4">
+                          <span className="inline-flex">
+                            <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-1 h-1 bg-current rounded-full animate-pulse mx-0.5" style={{ animationDelay: '200ms' }}></span>
+                            <span className="w-1 h-1 bg-current rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></span>
+                          </span>
+                        </div>
                       ) : (
-                        <i
-                          className={getLanguageIcon(file.language)}
-                          style={{
-                            fontSize: '12px',
-                            color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
-                          }}
-                        ></i>
-                      )}
-                    </div>
-
-                    {/* Filename */}
-                    {isEditingFilename && file.id === activeFileId ? (
-                      <div className="flex items-center min-w-0">
-                        <input
-                          type="text"
-                          value={editingName}
-                          onChange={(e) => handleEditingNameChange(e.target.value)}
-                          onBlur={handleFinishEditing}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleFinishEditing();
-                            } else if (e.key === 'Escape') {
-                              setIsEditingFilename(false);
-                              setEditingName('');
-                            }
-                          }}
-                          className="bg-transparent text-xs font-medium outline-none min-w-0 flex-1"
-                          style={{ color: 'var(--foreground)' }}
-                          autoFocus
-                          onFocus={(e) => e.target.select()}
-                        />
-                        <span className="text-xs font-medium opacity-60 flex-shrink-0" style={{ color: 'var(--foreground)' }}>
-                          .{getFileExtension(file.language)}
-                        </span>
-                      </div>
-                    ) : (
-                      <span
-                        className="text-xs font-medium truncate min-w-0 flex-1"
-                        style={{ color: 'var(--foreground)' }}
-                        onDoubleClick={() => file.id === activeFileId && handleStartEditing()}
-                      >
-                        <span>{getFilenameWithoutExtension(file.filename)}</span>
-                        <span className="opacity-60">.{getFileExtension(file.language)}</span>
-                        {file.isModified && <span className="ml-1 opacity-80">•</span>}
-                      </span>
-                    )}
-
-                    {/* Close Button */}
-                    {files.length > 1 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          closeFile(file.id);
-                        }}
-                        className={`flex-shrink-0 transition-opacity p-1 ${file.id === activeFileId
-                            ? 'opacity-60 hover:opacity-100'
-                            : 'opacity-0 group-hover:opacity-60 hover:opacity-100'
-                          }`}
-                        style={{ color: 'var(--foreground)' }}
-                      >
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform hover:scale-110">
+                          <polygon points="5,3 19,12 5,21" />
                         </svg>
-                      </button>
-                    )}
+                      )}
+                    </button>
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* Code Editor */}
-              <div className="flex-1 min-h-0 rounded-b-md overflow-hidden shadow-md" style={{
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-              }}>
-                <CodeEditor
-                  value={code}
-                  onChange={handleCodeChange}
-                  language={language}
-                  suggestedCode={suggestedCode || undefined}
-                  showDiff={showDiff}
-                  onApplyDiff={handleApplyFix}
-                  onRejectDiff={handleRejectFix}
-                />
-              </div>
-            </div>
-          </div>
+                <div className="flex-1 min-h-0 flex flex-col">
+                  {/* Tabs */}
+                  <div className="flex items-center overflow-x-auto scrollbar-hide">
+                    {files.map((file) => (
+                      <div
+                        key={file.id}
+                        className={`flex items-center gap-2 px-2 py-2 cursor-pointer group min-w-0 rounded-t-md transition-all duration-200 ${file.id === activeFileId
+                          ? 'shadow-sm'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
+                        style={{
+                          backgroundColor: file.id === activeFileId && theme === 'dark' ? '#1e1e1e' : 'transparent',
+                          boxShadow: file.id === activeFileId
+                            ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                            : 'none'
+                        }}
+                        onClick={() => switchToFile(file.id)}
+                      >
+                        {/* File Icon */}
+                        <div className="flex-shrink-0">
+                          {isCustomLanguage(file.language) ? (
+                            <span
+                              style={{
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                              }}
+                            >
+                              &lt;/&gt;
+                            </span>
+                          ) : isOmIcon(getLanguageIcon(file.language)) ? (
+                            <span
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                              }}
+                            >
+                              ॐ
+                            </span>
+                          ) : isLispIcon(getLanguageIcon(file.language)) ? (
+                            <img
+                              src="/lisp.png"
+                              alt="Lisp"
+                              style={{
+                                width: '12px',
+                                height: '12px',
+                                filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                              }}
+                            />
+                          ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
+                            <img
+                              src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
+                              alt="Assembly"
+                              style={{
+                                width: '14px',
+                                height: '14px',
+                                filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                              }}
+                            />
+                          ) : isBasicIcon(getLanguageIcon(file.language)) ? (
+                            <img
+                              src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
+                              alt="Basic"
+                              style={{
+                                width: '10px',
+                                height: '10px',
+                                filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                              }}
+                            />
+                          ) : (
+                            <i
+                              className={getLanguageIcon(file.language)}
+                              style={{
+                                fontSize: '12px',
+                                color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                              }}
+                            ></i>
+                          )}
+                        </div>
 
-          {/* Output Section */}
-          <div className="flex-1 min-h-0 flex flex-col p-4 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
-            <div className="flex-1 min-h-0">
-              <Output
-                output={output}
-                error={error}
-                isLoading={isLoading}
-                executionTime={executionStats.time}
-                memoryUsed={executionStats.memory}
-                onAIFix={language !== 'sanskrit' ? handleAIFix : undefined}
-                isFixingCode={isFixingCode}
-                stdin={stdin}
-                onStdinChange={setStdin}
-                code={code}
-              />
-            </div>
-          </div>
+                        {/* Filename */}
+                        {isEditingFilename && file.id === activeFileId ? (
+                          <div className="flex items-center min-w-0">
+                            <input
+                              type="text"
+                              value={editingName}
+                              onChange={(e) => handleEditingNameChange(e.target.value)}
+                              onBlur={handleFinishEditing}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleFinishEditing();
+                                } else if (e.key === 'Escape') {
+                                  setIsEditingFilename(false);
+                                  setEditingName('');
+                                }
+                              }}
+                              className="bg-transparent text-xs font-medium outline-none min-w-0 flex-1"
+                              style={{ color: 'var(--foreground)' }}
+                              autoFocus
+                              onFocus={(e) => e.target.select()}
+                            />
+                            <span className="text-xs font-medium opacity-60 flex-shrink-0" style={{ color: 'var(--foreground)' }}>
+                              .{getFileExtension(file.language)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span
+                            className="text-xs font-medium truncate min-w-0 flex-1"
+                            style={{ color: 'var(--foreground)' }}
+                            onDoubleClick={() => file.id === activeFileId && handleStartEditing()}
+                          >
+                            <span>{getFilenameWithoutExtension(file.filename)}</span>
+                            <span className="opacity-60">.{getFileExtension(file.language)}</span>
+                            {file.isModified && <span className="ml-1 opacity-80">•</span>}
+                          </span>
+                        )}
+
+                        {/* Close Button */}
+                        {files.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              closeFile(file.id);
+                            }}
+                            className={`flex-shrink-0 transition-opacity p-1 ${file.id === activeFileId
+                                ? 'opacity-60 hover:opacity-100'
+                                : 'opacity-0 group-hover:opacity-60 hover:opacity-100'
+                              }`}
+                            style={{ color: 'var(--foreground)' }}
+                          >
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Code Editor */}
+                  <div className="flex-1 min-h-0 rounded-b-md overflow-hidden shadow-md" style={{
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}>
+                    <CodeEditor
+                      value={code}
+                      onChange={handleCodeChange}
+                      language={language}
+                      suggestedCode={suggestedCode || undefined}
+                      showDiff={showDiff}
+                      onApplyDiff={handleApplyFix}
+                      onRejectDiff={handleRejectFix}
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+            rightPanel={
+              <div className="h-full flex flex-col p-4 animate-fade-in" style={{ backgroundColor: 'var(--background)' }}>
+                <div className="flex-1 min-h-0">
+                  <Output
+                    output={output}
+                    error={error}
+                    isLoading={isLoading}
+                    executionTime={executionStats.time}
+                    memoryUsed={executionStats.memory}
+                    onAIFix={language !== 'sanskrit' ? handleAIFix : undefined}
+                    isFixingCode={isFixingCode}
+                    stdin={stdin}
+                    onStdinChange={setStdin}
+                    code={code}
+                  />
+                </div>
+              </div>
+            }
+          />
         </div>
 
         {/* Desktop Layout - Resizable panels */}
@@ -961,7 +1066,17 @@ export default function Home() {
                       >
                         {/* File Icon */}
                         <div className="flex-shrink-0">
-                          {isOmIcon(getLanguageIcon(file.language)) ? (
+                          {isCustomLanguage(file.language) ? (
+                            <span
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: file.id === activeFileId ? '#fbbf24' : 'currentColor'
+                              }}
+                            >
+                              &lt;/&gt;
+                            </span>
+                          ) : isOmIcon(getLanguageIcon(file.language)) ? (
                             <span
                               style={{
                                 fontSize: '14px',
@@ -1131,6 +1246,20 @@ export default function Home() {
 
       {/* Info Overlay */}
       <InfoOverlay />
+
+      {/* Custom Language Creator */}
+      <CustomLanguageCreator
+        isOpen={showCustomLanguageCreator}
+        onClose={() => setShowCustomLanguageCreator(false)}
+        onSave={handleCreateCustomLanguage}
+      />
+
+      {/* Keyword Translations Viewer */}
+      <KeywordTranslationsViewer
+        isOpen={showKeywordViewer}
+        onClose={() => setShowKeywordViewer(false)}
+        language={viewingLanguage}
+      />
     </div>
   );
 }

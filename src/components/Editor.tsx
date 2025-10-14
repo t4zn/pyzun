@@ -5,6 +5,7 @@ import { useTheme } from './ThemeProvider';
 import { useEffect, useRef, useCallback } from 'react';
 import * as monaco from 'monaco-editor';
 import { SparkIcon } from './SparkIcon';
+import CustomLanguageService from '../services/customLanguageService';
 
 interface EditorProps {
   value: string;
@@ -69,6 +70,90 @@ export default function CodeEditor({
   const monacoRef = useRef<typeof monaco | null>(null);
 
   const decorationIds = useRef<string[]>([]);
+  const customKeywordDecorationIds = useRef<string[]>([]);
+
+  // Determine the Monaco language to use
+  const getMonacoLanguage = (lang: string) => {
+    if (CustomLanguageService.isCustomLanguage(lang)) {
+      return 'python'; // Custom languages use Python syntax highlighting
+    }
+    return languageMap[lang] || 'python';
+  };
+
+  // Register custom language highlighting
+  const registerCustomLanguageHighlighting = useCallback((monaco: typeof import('monaco-editor')) => {
+    if (!CustomLanguageService.isCustomLanguage(language)) return;
+
+    const customLang = CustomLanguageService.getCustomLanguage(language);
+    if (!customLang) return;
+
+    const customKeywords = Object.keys(customLang.keywords);
+    if (customKeywords.length === 0) return;
+
+    // Create a unique language ID for this custom language
+    const customLanguageId = `custom-${language}`;
+
+    // Register the custom language if not already registered
+    const languages = monaco.languages.getLanguages();
+    if (!languages.find(lang => lang.id === customLanguageId)) {
+      monaco.languages.register({ id: customLanguageId });
+    }
+
+    // Create tokenizer rules for custom keywords
+    const keywordRules: any[] = customKeywords.map(keyword => [
+      new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
+      'keyword'
+    ]);
+
+    // Set up the tokenizer with Python base + custom keywords
+    monaco.languages.setMonarchTokensProvider(customLanguageId, {
+      keywords: customKeywords,
+      tokenizer: {
+        root: [
+          // Custom keywords first (higher priority)
+          ...keywordRules,
+          // Python keywords
+          [/\b(and|as|assert|break|class|continue|def|del|elif|else|except|exec|finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|raise|return|try|while|with|yield|True|False|None)\b/, 'keyword'],
+          // Strings
+          [/"([^"\\]|\\.)*$/, 'string.invalid'],
+          [/'([^'\\]|\\.)*$/, 'string.invalid'],
+          [/"/, 'string', '@string_double'],
+          [/'/, 'string', '@string_single'],
+          // Comments
+          [/#.*$/, 'comment'],
+          // Numbers
+          [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
+          [/0[xX][0-9a-fA-F]+/, 'number.hex'],
+          [/\d+/, 'number'],
+          // Operators
+          [/[+\-*\/=<>!&|^~%]/, 'operator'],
+          // Delimiters
+          [/[{}()\[\]]/, 'delimiter.bracket'],
+          [/[;,.]/, 'delimiter'],
+          // Identifiers
+          [/[a-zA-Z_]\w*/, 'identifier']
+        ],
+        string_double: [
+          [/[^\\"]+/, 'string'],
+          [/\\./, 'string.escape'],
+          [/"/, 'string', '@pop']
+        ],
+        string_single: [
+          [/[^\\']+/, 'string'],
+          [/\\./, 'string.escape'],
+          [/'/, 'string', '@pop']
+        ]
+      }
+    });
+
+    // Apply the custom language to the current model
+    if (editorRef.current) {
+      const model = editorRef.current.getModel();
+      if (model) {
+        monaco.editor.setModelLanguage(model, customLanguageId);
+      }
+    }
+  }, [language]);
 
   const applyDiffDecorations = useCallback(() => {
     if (!editorRef.current || !monacoRef.current || !showDiff || !suggestedCode || !value) {
@@ -125,6 +210,7 @@ export default function CodeEditor({
     editorRef.current = editor;
     monacoRef.current = monacoInstance;
     applyDiffDecorations();
+    registerCustomLanguageHighlighting(monacoInstance);
   };
 
   // Clear undo history when language changes
@@ -144,6 +230,12 @@ export default function CodeEditor({
   useEffect(() => {
     applyDiffDecorations();
   }, [showDiff, suggestedCode, value, applyDiffDecorations]);
+
+  useEffect(() => {
+    if (monacoRef.current) {
+      registerCustomLanguageHighlighting(monacoRef.current);
+    }
+  }, [registerCustomLanguageHighlighting]);
 
   // Clear decorations when component unmounts or diff is hidden
   useEffect(() => {
@@ -184,7 +276,7 @@ export default function CodeEditor({
       )}
       <Editor
         height="100%"
-        language={languageMap[language] || 'python'}
+        language={CustomLanguageService.isCustomLanguage(language) ? `custom-${language}` : getMonacoLanguage(language)}
         value={showDiff && suggestedCode ? suggestedCode : value}
         onChange={onChange}
         onMount={(editor, monaco) => {

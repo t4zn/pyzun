@@ -86,11 +86,12 @@ export default function ResizablePanels({
 
       {/* Resizer */}
       <div
-        className="w-4 sm:w-6 bg-transparent cursor-col-resize flex-shrink-0 group flex items-center justify-center touch-none"
+        className="w-4 sm:w-6 cursor-col-resize flex-shrink-0 group flex items-center justify-center touch-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
+        style={{ backgroundColor: isDragging ? 'rgba(59, 130, 246, 0.1)' : 'transparent' }}
       >
-        <div className="flex flex-col gap-1 opacity-30 group-hover:opacity-60 transition-opacity duration-200">
+        <div className="flex flex-col gap-1 opacity-40 group-hover:opacity-70 transition-opacity duration-200">
           <div 
             className="w-1 h-1 rounded-full"
             style={{ backgroundColor: 'var(--foreground)' }}
