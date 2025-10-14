@@ -703,7 +703,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="h-[calc(100vh-60px)] sm:h-[calc(100vh-68px)] lg:h-[calc(100vh-89px)]">
+      <div className="h-[calc(100vh-120px)] sm:h-[calc(100vh-128px)] lg:h-[calc(100vh-149px)]">
         {/* Mobile/Tablet Layout - Stacked vertically on small screens, resizable on medium+ */}
         <div className="xl:hidden h-full">
           {/* Mobile Portrait - Stacked Layout */}
@@ -1547,6 +1547,11 @@ export default function Home() {
         onClose={() => setShowKeywordViewer(false)}
         language={viewingLanguage}
       />
+
+      {/* Footer */}
+      <footer className="text-center py-4 text-xs opacity-60" style={{ color: 'var(--foreground)' }}>
+        © 2025 Taizun. All rights reserved.
+      </footer>
     </div>
   );
 }
