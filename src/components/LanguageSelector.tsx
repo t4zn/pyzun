@@ -12,9 +12,9 @@ interface LanguageSelectorProps {
 
 const languages = [
   { value: 'sanskrit', label: 'Sanskrit', id: 85, icon: 'om-text', isNew: true },
-  { value: 'assembly', label: 'Assembly', id: 45, icon: 'devicon-cplusplus-plain' },
+  { value: 'assembly', label: 'Assembly', id: 45, icon: 'assembly-png' },
   { value: 'bash', label: 'Bash', id: 46, icon: 'devicon-bash-plain' },
-  { value: 'basic', label: 'Basic', id: 47, icon: 'devicon-bootstrap-plain' },
+  { value: 'basic', label: 'Basic', id: 47, icon: 'basic-png' },
   { value: 'c', label: 'C', id: 50, icon: 'devicon-c-plain' },
   { value: 'cpp', label: 'C++', id: 54, icon: 'devicon-cplusplus-plain' },
   { value: 'csharp', label: 'C#', id: 51, icon: 'devicon-csharp-plain' },
@@ -102,6 +102,18 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
               <span className="text-sm sm:text-base font-bold">ॐ</span>
             ) : isLispIcon(selectedLanguage.icon) ? (
               <img src="/lisp.png" alt="Lisp" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            ) : isAssemblyIcon(selectedLanguage.icon) ? (
+              <img 
+                src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'} 
+                alt="Assembly" 
+                className="w-4 h-4 sm:w-5 sm:h-5" 
+              />
+            ) : isBasicIcon(selectedLanguage.icon) ? (
+              <img 
+                src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'} 
+                alt="Basic" 
+                className="w-3 h-3 sm:w-3.5 sm:h-3.5" 
+              />
             ) : (
               <i className={`${selectedLanguage.icon} text-sm sm:text-base`}></i>
             )
@@ -165,6 +177,26 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
                       <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
                     ) : isLispIcon(lang.icon) ? (
                       <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
+                    ) : isAssemblyIcon(lang.icon) ? (
+                      <img 
+                        src={
+                          lang.value === language 
+                            ? (theme === 'dark' ? '/assemblylight.PNG' : '/assemblydark.PNG')
+                            : (theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG')
+                        } 
+                        alt="Assembly" 
+                        style={{ width: '18px', height: '18px' }} 
+                      />
+                    ) : isBasicIcon(lang.icon) ? (
+                      <img 
+                        src={
+                          lang.value === language 
+                            ? (theme === 'dark' ? '/basiclight.PNG' : '/basicdark.PNG')
+                            : (theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG')
+                        } 
+                        alt="Basic" 
+                        style={{ width: '14px', height: '14px' }} 
+                      />
                     ) : (
                       <i className={lang.icon} style={{ fontSize: '16px' }}></i>
                     )}
@@ -209,4 +241,12 @@ export const isOmIcon = (icon: string): boolean => {
 
 export const isLispIcon = (icon: string): boolean => {
   return icon === 'lisp-png';
+};
+
+export const isAssemblyIcon = (icon: string): boolean => {
+  return icon === 'assembly-png';
+};
+
+export const isBasicIcon = (icon: string): boolean => {
+  return icon === 'basic-png';
 };

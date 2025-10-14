@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
-import LanguageSelector, { getLanguageIcon, isOmIcon, isLispIcon } from '../components/LanguageSelector';
+import LanguageSelector, { getLanguageIcon, isOmIcon, isLispIcon, isAssemblyIcon, isBasicIcon } from '../components/LanguageSelector';
 import ResizablePanels from '../components/ResizablePanels';
 
 import { useJudge0 } from '../hooks/useJudge0';
@@ -728,6 +728,26 @@ export default function Home() {
                             filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
                           }}
                         />
+                      ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
+                        <img
+                          src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
+                          alt="Assembly"
+                          style={{
+                            width: '14px',
+                            height: '14px',
+                            filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                          }}
+                        />
+                      ) : isBasicIcon(getLanguageIcon(file.language)) ? (
+                        <img
+                          src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
+                          alt="Basic"
+                          style={{
+                            width: '10px',
+                            height: '10px',
+                            filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                          }}
+                        />
                       ) : (
                         <i
                           className={getLanguageIcon(file.language)}
@@ -958,6 +978,26 @@ export default function Home() {
                               style={{
                                 width: '14px',
                                 height: '14px',
+                                filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                              }}
+                            />
+                          ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
+                            <img
+                              src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
+                              alt="Assembly"
+                              style={{
+                                width: '16px',
+                                height: '16px',
+                                filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
+                              }}
+                            />
+                          ) : isBasicIcon(getLanguageIcon(file.language)) ? (
+                            <img
+                              src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
+                              alt="Basic"
+                              style={{
+                                width: '12px',
+                                height: '12px',
                                 filter: file.id === activeFileId ? 'sepia(1) saturate(3) hue-rotate(35deg)' : 'none'
                               }}
                             />
