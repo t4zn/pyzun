@@ -70,7 +70,7 @@ export default function CodeEditor({
   const monacoRef = useRef<typeof monaco | null>(null);
 
   const decorationIds = useRef<string[]>([]);
-  const customKeywordDecorationIds = useRef<string[]>([]);
+
 
   // Determine the Monaco language to use
   const getMonacoLanguage = (lang: string) => {
@@ -100,7 +100,7 @@ export default function CodeEditor({
     }
 
     // Create tokenizer rules for custom keywords
-    const keywordRules: any[] = customKeywords.map(keyword => [
+    const keywordRules: [RegExp, string][] = customKeywords.map(keyword => [
       new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
       'keyword'
     ]);

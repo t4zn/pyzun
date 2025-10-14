@@ -55,7 +55,7 @@ class CustomLanguageService {
   static getDefaultCode(language: CustomLanguage): string {
     // Create a simple hello world program using the custom language
     const printKeyword = Object.entries(language.keywords)
-      .find(([_, pythonKeyword]) => pythonKeyword === 'print')?.[0] || 'print';
+      .find(([, pythonKeyword]) => pythonKeyword === 'print')?.[0] || 'print';
     
     return `${printKeyword}("Hello, World!")
 ${printKeyword}("Welcome to ${language.name}!")`;

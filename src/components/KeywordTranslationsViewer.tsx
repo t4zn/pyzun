@@ -1,7 +1,7 @@
 'use client';
 
 import { useTheme } from './ThemeProvider';
-import CustomLanguageService, { CustomLanguage } from '../services/customLanguageService';
+import CustomLanguageService from '../services/customLanguageService';
 
 interface KeywordTranslationsViewerProps {
   isOpen: boolean;
