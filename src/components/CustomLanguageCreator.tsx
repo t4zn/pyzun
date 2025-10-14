@@ -171,8 +171,17 @@ export default function CustomLanguageCreator({ isOpen, onClose, onSave }: Custo
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              style={{ color: 'var(--foreground)' }}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              style={{
+                color: 'var(--foreground)',
+                backgroundColor: 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = theme === 'dark' ? '#374151' : '#f3f4f6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -332,22 +341,22 @@ export default function CustomLanguageCreator({ isOpen, onClose, onSave }: Custo
               style={{
                 backgroundColor: (!languageName.trim() || !extension.trim() || !!nameError || !!extensionError)
                   ? (theme === 'dark' ? '#374151' : '#9ca3af')
-                  : '#3b82f6',
+                  : '#ca8a04',
                 opacity: (!languageName.trim() || !extension.trim() || !!nameError || !!extensionError) ? 0.5 : 1,
                 transform: (!languageName.trim() || !extension.trim() || !!nameError || !!extensionError) ? 'none' : 'scale(1)',
                 boxShadow: (!languageName.trim() || !extension.trim() || !!nameError || !!extensionError)
                   ? 'none'
-                  : '0 4px 14px 0 rgba(59, 130, 246, 0.3)'
+                  : '0 4px 14px 0 rgba(202, 138, 4, 0.3)'
               }}
               onMouseEnter={(e) => {
                 if (!(!languageName.trim() || !extension.trim() || !!nameError || !!extensionError)) {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
+                  e.currentTarget.style.backgroundColor = '#a16207';
                   e.currentTarget.style.transform = 'scale(1.02)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!(!languageName.trim() || !extension.trim() || !!nameError || !!extensionError)) {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
+                  e.currentTarget.style.backgroundColor = '#ca8a04';
                   e.currentTarget.style.transform = 'scale(1)';
                 }
               }}

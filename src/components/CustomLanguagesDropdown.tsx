@@ -160,7 +160,16 @@ export default function CustomLanguagesDropdown({ onSelectLanguage, onCreateNew,
                     {/* Delete Button */}
                     <button
                       onClick={(e) => handleDelete(id, e)}
-                      className="px-2 py-2 hover:opacity-70 transition-all duration-150 text-red-500 hover:text-red-600"
+                      className="px-2 py-2 transition-all duration-150"
+                      style={{ color: '#ca8a04' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#a16207';
+                        e.currentTarget.style.opacity = '0.7';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#ca8a04';
+                        e.currentTarget.style.opacity = '1';
+                      }}
                       title="Delete language"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
