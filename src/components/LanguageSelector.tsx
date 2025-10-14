@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { useTheme } from './ThemeProvider';
 import CustomLanguageService from '../services/customLanguageService';
 
@@ -55,7 +56,7 @@ const languages = [
 export default function LanguageSelector({ language, onChange, onCreateNew, onViewLanguage, onDeleteLanguage, refreshTrigger }: LanguageSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [customLanguages, setCustomLanguages] = useState<Record<string, any>>({});
+  const [customLanguages, setCustomLanguages] = useState<Record<string, { name: string; extension: string; keywords: Record<string, string> }>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { theme } = useTheme();
@@ -69,7 +70,7 @@ export default function LanguageSelector({ language, onChange, onCreateNew, onVi
     lang.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const customLanguageEntries = Object.entries(customLanguages).filter(([id, lang]) =>
+  const customLanguageEntries = Object.entries(customLanguages).filter(([, lang]) =>
     lang.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -156,17 +157,21 @@ export default function LanguageSelector({ language, onChange, onCreateNew, onVi
             ) : isOmIcon(selectedLanguage.icon) ? (
               <span className="text-sm sm:text-base font-bold">ॐ</span>
             ) : isLispIcon(selectedLanguage.icon) ? (
-              <img src="/lisp.png" alt="Lisp" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Image src="/lisp.png" alt="Lisp" width={16} height={16} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             ) : isAssemblyIcon(selectedLanguage.icon) ? (
-              <img
+              <Image
                 src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
                 alt="Assembly"
+                width={20}
+                height={20}
                 className="w-4 h-4 sm:w-5 sm:h-5"
               />
             ) : isBasicIcon(selectedLanguage.icon) ? (
-              <img
+              <Image
                 src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
                 alt="Basic"
+                width={14}
+                height={14}
                 className="w-3 h-3 sm:w-3.5 sm:h-3.5"
               />
             ) : (
@@ -316,25 +321,29 @@ export default function LanguageSelector({ language, onChange, onCreateNew, onVi
                       {isOmIcon(lang.icon) ? (
                         <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
                       ) : isLispIcon(lang.icon) ? (
-                        <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
+                        <Image src="/lisp.png" alt="Lisp" width={16} height={16} style={{ width: '16px', height: '16px' }} />
                       ) : isAssemblyIcon(lang.icon) ? (
-                        <img
+                        <Image
                           src={
                             lang.value === language
                               ? (theme === 'dark' ? '/assemblylight.PNG' : '/assemblydark.PNG')
                               : (theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG')
                           }
                           alt="Assembly"
+                          width={18}
+                          height={18}
                           style={{ width: '18px', height: '18px' }}
                         />
                       ) : isBasicIcon(lang.icon) ? (
-                        <img
+                        <Image
                           src={
                             lang.value === language
                               ? (theme === 'dark' ? '/basiclight.PNG' : '/basicdark.PNG')
                               : (theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG')
                           }
                           alt="Basic"
+                          width={14}
+                          height={14}
                           style={{ width: '14px', height: '14px' }}
                         />
                       ) : (

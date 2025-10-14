@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import CodeEditor from '../components/Editor';
 import Output from '../components/Output';
 import LanguageSelector, { getLanguageIcon, isOmIcon, isLispIcon, isAssemblyIcon, isBasicIcon } from '../components/LanguageSelector';
@@ -648,7 +649,7 @@ export default function Home() {
       <header className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6" style={{ backgroundColor: 'var(--background)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src="/pyzun.svg" alt="Pyzun" className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
+            <Image src="/pyzun.svg" alt="Pyzun" width={32} height={32} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
             <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-medium tracking-wide" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-league-spartan), sans-serif' }}>Pyzun</h1>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 xl:gap-6">
@@ -816,9 +817,11 @@ export default function Home() {
                             ॐ
                           </span>
                         ) : isLispIcon(getLanguageIcon(file.language)) ? (
-                          <img
+                          <Image
                             src="/lisp.png"
                             alt="Lisp"
+                            width={10}
+                            height={10}
                             style={{
                               width: '10px',
                               height: '10px',
@@ -826,9 +829,11 @@ export default function Home() {
                             }}
                           />
                         ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
-                          <img
+                          <Image
                             src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
                             alt="Assembly"
+                            width={12}
+                            height={12}
                             style={{
                               width: '12px',
                               height: '12px',
@@ -836,9 +841,11 @@ export default function Home() {
                             }}
                           />
                         ) : isBasicIcon(getLanguageIcon(file.language)) ? (
-                          <img
+                          <Image
                             src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
                             alt="Basic"
+                            width={8}
+                            height={8}
                             style={{
                               width: '8px',
                               height: '8px',
@@ -1077,9 +1084,11 @@ export default function Home() {
                                 ॐ
                               </span>
                             ) : isLispIcon(getLanguageIcon(file.language)) ? (
-                              <img
+                              <Image
                                 src="/lisp.png"
                                 alt="Lisp"
+                                width={12}
+                                height={12}
                                 style={{
                                   width: '12px',
                                   height: '12px',
@@ -1087,9 +1096,11 @@ export default function Home() {
                                 }}
                               />
                             ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
-                              <img
+                              <Image
                                 src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
                                 alt="Assembly"
+                                width={14}
+                                height={14}
                                 style={{
                                   width: '14px',
                                   height: '14px',
@@ -1097,9 +1108,11 @@ export default function Home() {
                                 }}
                               />
                             ) : isBasicIcon(getLanguageIcon(file.language)) ? (
-                              <img
+                              <Image
                                 src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
                                 alt="Basic"
+                                width={10}
+                                height={10}
                                 style={{
                                   width: '10px',
                                   height: '10px',
@@ -1343,9 +1356,11 @@ export default function Home() {
                               ॐ
                             </span>
                           ) : isLispIcon(getLanguageIcon(file.language)) ? (
-                            <img
+                            <Image
                               src="/lisp.png"
                               alt="Lisp"
+                              width={14}
+                              height={14}
                               style={{
                                 width: '14px',
                                 height: '14px',
@@ -1353,9 +1368,11 @@ export default function Home() {
                               }}
                             />
                           ) : isAssemblyIcon(getLanguageIcon(file.language)) ? (
-                            <img
+                            <Image
                               src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
                               alt="Assembly"
+                              width={16}
+                              height={16}
                               style={{
                                 width: '16px',
                                 height: '16px',
@@ -1363,9 +1380,11 @@ export default function Home() {
                               }}
                             />
                           ) : isBasicIcon(getLanguageIcon(file.language)) ? (
-                            <img
+                            <Image
                               src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
                               alt="Basic"
+                              width={12}
+                              height={12}
                               style={{
                                 width: '12px',
                                 height: '12px',

@@ -52,7 +52,7 @@ export default function CustomLanguageCreator({ isOpen, onClose, onSave }: Custo
   };
 
   const getCurrentTranslation = (pythonKeyword: string): string => {
-    const entry = Object.entries(keywordTranslations).find(([_, value]) => value === pythonKeyword);
+    const entry = Object.entries(keywordTranslations).find(([, value]) => value === pythonKeyword);
     return entry ? entry[0] : '';
   };
 

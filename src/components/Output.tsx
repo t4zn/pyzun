@@ -44,15 +44,15 @@ export default function Output({
 
   const showStats = !isLoading && (output || error) && (executionTime !== null || memoryUsed !== null);
 
-  // Check if code likely needs input
-  const needsInput = code && (
-    code.includes('input(') ||
-    code.includes('scanf(') ||
-    code.includes('cin >>') ||
-    code.includes('Scanner') ||
-    code.includes('readLine') ||
-    code.includes('Console.ReadLine')
-  );
+  // Check if code likely needs input (currently unused but kept for future use)
+  // const needsInput = code && (
+  //   code.includes('input(') ||
+  //   code.includes('scanf(') ||
+  //   code.includes('cin >>') ||
+  //   code.includes('Scanner') ||
+  //   code.includes('readLine') ||
+  //   code.includes('Console.ReadLine')
+  // );
 
   return (
     <div className="h-full flex flex-col" style={{ backgroundColor: 'var(--background)' }}>
