@@ -657,7 +657,10 @@ export default function Home() {
       {/* Header */}
       <header className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6" style={{ backgroundColor: 'var(--background)' }}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div 
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            onClick={() => window.location.reload()}
+          >
             <Image src="/pyzun.svg" alt="Pyzun" width={32} height={32} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
             <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-medium tracking-wide" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-league-spartan), sans-serif' }}>Pyzun</h1>
           </div>
