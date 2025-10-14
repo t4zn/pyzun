@@ -11,7 +11,6 @@ import { useAICodeFix } from '../hooks/useAICodeFix';
 import { useTheme } from '../components/ThemeProvider';
 import InfoOverlay from '../components/info-overlay';
 import CustomLanguageCreator from '../components/CustomLanguageCreator';
-import CustomLanguagesDropdown from '../components/CustomLanguagesDropdown';
 import KeywordTranslationsViewer from '../components/KeywordTranslationsViewer';
 import CustomLanguageService, { CustomLanguage } from '../services/customLanguageService';
 
@@ -656,9 +655,6 @@ export default function Home() {
             <LanguageSelector 
               language={language} 
               onChange={handleLanguageChange}
-            />
-            <CustomLanguagesDropdown
-              onSelectLanguage={handleLanguageChange}
               onCreateNew={() => setShowCustomLanguageCreator(true)}
               onViewLanguage={handleViewLanguage}
               onDeleteLanguage={handleDeleteLanguage}

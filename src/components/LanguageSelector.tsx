@@ -2,10 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useTheme } from './ThemeProvider';
+import CustomLanguageService from '../services/customLanguageService';
 
 interface LanguageSelectorProps {
   language: string;
   onChange: (language: string) => void;
+  onCreateNew?: () => void;
+  onViewLanguage?: (languageId: string) => void;
+  onDeleteLanguage?: (languageId: string) => void;
+  refreshTrigger?: number;
 }
 
 const languages = [
@@ -47,18 +52,51 @@ const languages = [
   { value: 'visual_basic', label: 'Visual Basic', id: 84, icon: 'devicon-visualbasic-plain' }
 ];
 
-export default function LanguageSelector({ language, onChange }: LanguageSelectorProps) {
+export default function LanguageSelector({ language, onChange, onCreateNew, onViewLanguage, onDeleteLanguage, refreshTrigger }: LanguageSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [customLanguages, setCustomLanguages] = useState<Record<string, any>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { theme } = useTheme();
+
+  // Load custom languages on mount and when refreshTrigger changes
+  useEffect(() => {
+    setCustomLanguages(CustomLanguageService.getLanguages());
+  }, [refreshTrigger]);
 
   const filteredLanguages = languages.filter(lang =>
     lang.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedLanguage = languages.find(lang => lang.value === language);
+  const customLanguageEntries = Object.entries(customLanguages).filter(([id, lang]) =>
+    lang.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Check if it's a custom language
+  const getSelectedLanguage = () => {
+    const builtInLanguage = languages.find(lang => lang.value === language);
+    if (builtInLanguage) {
+      return builtInLanguage;
+    }
+
+    // Check if it's a custom language
+    if (CustomLanguageService.isCustomLanguage(language)) {
+      const customLang = CustomLanguageService.getCustomLanguage(language);
+      if (customLang) {
+        return {
+          value: language,
+          label: customLang.name,
+          id: 71, // Use Python's ID since custom languages compile to Python
+          icon: 'custom'
+        };
+      }
+    }
+
+    return null;
+  };
+
+  const selectedLanguage = getSelectedLanguage();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -84,6 +122,23 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
     setSearchTerm('');
   };
 
+  const handleCreateNew = () => {
+    onCreateNew?.();
+    setIsOpen(false);
+    setSearchTerm('');
+  };
+
+  const handleView = (languageId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    onViewLanguage?.(languageId);
+    setIsOpen(false);
+  };
+
+  const handleDelete = (languageId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    onDeleteLanguage?.(languageId);
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -96,21 +151,23 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
       >
         <div className="flex items-center gap-1 sm:gap-2">
           {selectedLanguage && (
-            isOmIcon(selectedLanguage.icon) ? (
+            selectedLanguage.icon === 'custom' ? (
+              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>&lt;/&gt;</span>
+            ) : isOmIcon(selectedLanguage.icon) ? (
               <span className="text-sm sm:text-base font-bold">ॐ</span>
             ) : isLispIcon(selectedLanguage.icon) ? (
               <img src="/lisp.png" alt="Lisp" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             ) : isAssemblyIcon(selectedLanguage.icon) ? (
-              <img 
-                src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'} 
-                alt="Assembly" 
-                className="w-4 h-4 sm:w-5 sm:h-5" 
+              <img
+                src={theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG'}
+                alt="Assembly"
+                className="w-4 h-4 sm:w-5 sm:h-5"
               />
             ) : isBasicIcon(selectedLanguage.icon) ? (
-              <img 
-                src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'} 
-                alt="Basic" 
-                className="w-3 h-3 sm:w-3.5 sm:h-3.5" 
+              <img
+                src={theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG'}
+                alt="Basic"
+                className="w-3 h-3 sm:w-3.5 sm:h-3.5"
               />
             ) : (
               <i className={`${selectedLanguage.icon} text-sm sm:text-base`}></i>
@@ -118,12 +175,12 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
           )}
           <span className="truncate">{selectedLanguage?.label || 'Select Language'}</span>
         </div>
-        <svg 
-          width="10" 
-          height="10" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
           strokeWidth="2"
           className={`transition-transform duration-200 sm:w-3 sm:h-3 ${isOpen ? 'rotate-180' : ''}`}
         >
@@ -132,7 +189,7 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
       </button>
 
       {isOpen && (
-        <div 
+        <div
           className="absolute top-full left-0 right-0 max-h-80 overflow-hidden z-50 animate-fade-in"
           style={{
             backgroundColor: 'var(--background)'
@@ -147,10 +204,10 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search languages..."
               className="w-full px-2 py-1 bg-transparent outline-none font-mono text-sm rounded border border-gray-200 dark:border-gray-700"
-              style={{ 
+              style={{
                 color: 'var(--foreground)',
                 backgroundColor: 'var(--background)',
-                boxShadow: theme === 'dark' 
+                boxShadow: theme === 'dark'
                   ? '0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06)'
                   : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
               }}
@@ -159,62 +216,151 @@ export default function LanguageSelector({ language, onChange }: LanguageSelecto
 
           {/* Language List */}
           <div className="overflow-y-auto max-h-64">
-            {filteredLanguages.length > 0 ? (
-              filteredLanguages.map((lang) => (
-                <button
-                  key={lang.value}
-                  onClick={() => handleSelect(lang.value)}
-                  className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2 justify-between"
-                  style={{
-                    backgroundColor: lang.value === language ? 'var(--foreground)' : 'var(--background)',
-                    color: lang.value === language ? 'var(--background)' : 'var(--foreground)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    {isOmIcon(lang.icon) ? (
-                      <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
-                    ) : isLispIcon(lang.icon) ? (
-                      <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
-                    ) : isAssemblyIcon(lang.icon) ? (
-                      <img 
-                        src={
-                          lang.value === language 
-                            ? (theme === 'dark' ? '/assemblylight.PNG' : '/assemblydark.PNG')
-                            : (theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG')
-                        } 
-                        alt="Assembly" 
-                        style={{ width: '18px', height: '18px' }} 
-                      />
-                    ) : isBasicIcon(lang.icon) ? (
-                      <img 
-                        src={
-                          lang.value === language 
-                            ? (theme === 'dark' ? '/basiclight.PNG' : '/basicdark.PNG')
-                            : (theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG')
-                        } 
-                        alt="Basic" 
-                        style={{ width: '14px', height: '14px' }} 
-                      />
-                    ) : (
-                      <i className={lang.icon} style={{ fontSize: '16px' }}></i>
-                    )}
-                    <span>{lang.label}</span>
-                  </div>
-                  {lang.isNew && (
-                    <span 
-                      className="px-1 py-0.5 font-medium rounded opacity-70"
+            {/* Create New Language Button */}
+            <button
+              onClick={handleCreateNew}
+              className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2 border-b"
+              style={{
+                backgroundColor: 'var(--background)',
+                color: 'var(--foreground)',
+                borderColor: theme === 'dark' ? '#374151' : '#e5e7eb'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Create Language</span>
+            </button>
+
+            {/* Custom Languages Section */}
+            {customLanguageEntries.length > 0 && (
+              <>
+                <div className="px-4 py-2 text-xs font-medium opacity-60 border-b" style={{
+                  color: 'var(--foreground)',
+                  borderColor: theme === 'dark' ? '#374151' : '#e5e7eb'
+                }}>
+                  My Languages
+                </div>
+                {customLanguageEntries.map(([id, lang]) => (
+                  <div key={id} className="flex items-center">
+                    <button
+                      onClick={() => handleSelect(id)}
+                      className="flex-1 px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2"
                       style={{
-                        backgroundColor: 'var(--foreground)',
-                        color: 'var(--background)',
-                        fontSize: '9px'
+                        backgroundColor: id === language ? 'var(--foreground)' : 'var(--background)',
+                        color: id === language ? 'var(--background)' : 'var(--foreground)'
                       }}
                     >
-                      NEW
-                    </span>
-                  )}
-                </button>
-              ))
-            ) : (
+                      <span style={{ fontSize: '14px', fontWeight: 'bold' }}>&lt;/&gt;</span>
+                      <span>{lang.name}</span>
+                    </button>
+
+                    <div className="flex items-center">
+                      {/* View Button */}
+                      {Object.keys(lang.keywords).length > 0 && (
+                        <button
+                          onClick={(e) => handleView(id, e)}
+                          className="px-2 py-2 hover:opacity-70 transition-all duration-150"
+                          style={{ color: 'var(--foreground)' }}
+                          title="View keywords"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        </button>
+                      )}
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => handleDelete(id, e)}
+                        className="px-2 py-2 hover:opacity-70 transition-all duration-150 text-red-500 hover:text-red-600"
+                        title="Delete language"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="3,6 5,6 21,6" />
+                          <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Separator */}
+                <div className="border-b" style={{ borderColor: theme === 'dark' ? '#374151' : '#e5e7eb' }}></div>
+              </>
+            )}
+
+            {/* Built-in Languages Section */}
+            {filteredLanguages.length > 0 && (
+              <>
+                {customLanguageEntries.length > 0 && (
+                  <div className="px-4 py-2 text-xs font-medium opacity-60" style={{ color: 'var(--foreground)' }}>
+                    Built-in Languages
+                  </div>
+                )}
+                {filteredLanguages.map((lang) => (
+                  <button
+                    key={lang.value}
+                    onClick={() => handleSelect(lang.value)}
+                    className="w-full px-4 py-2 text-left hover:opacity-70 transition-all duration-150 font-medium text-sm hover:translate-x-1 flex items-center gap-2 justify-between"
+                    style={{
+                      backgroundColor: lang.value === language ? 'var(--foreground)' : 'var(--background)',
+                      color: lang.value === language ? 'var(--background)' : 'var(--foreground)'
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isOmIcon(lang.icon) ? (
+                        <span style={{ fontSize: '16px', fontWeight: 'bold' }}>ॐ</span>
+                      ) : isLispIcon(lang.icon) ? (
+                        <img src="/lisp.png" alt="Lisp" style={{ width: '16px', height: '16px' }} />
+                      ) : isAssemblyIcon(lang.icon) ? (
+                        <img
+                          src={
+                            lang.value === language
+                              ? (theme === 'dark' ? '/assemblylight.PNG' : '/assemblydark.PNG')
+                              : (theme === 'dark' ? '/assemblydark.PNG' : '/assemblylight.PNG')
+                          }
+                          alt="Assembly"
+                          style={{ width: '18px', height: '18px' }}
+                        />
+                      ) : isBasicIcon(lang.icon) ? (
+                        <img
+                          src={
+                            lang.value === language
+                              ? (theme === 'dark' ? '/basiclight.PNG' : '/basicdark.PNG')
+                              : (theme === 'dark' ? '/basicdark.PNG' : '/basiclight.PNG')
+                          }
+                          alt="Basic"
+                          style={{ width: '14px', height: '14px' }}
+                        />
+                      ) : (
+                        <i className={lang.icon} style={{ fontSize: '16px' }}></i>
+                      )}
+                      <span>{lang.label}</span>
+                    </div>
+                    {lang.isNew && (
+                      <span
+                        className="px-1 py-0.5 font-medium rounded opacity-70"
+                        style={{
+                          backgroundColor: 'var(--foreground)',
+                          color: 'var(--background)',
+                          fontSize: '9px'
+                        }}
+                      >
+                        NEW
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* No Results */}
+            {filteredLanguages.length === 0 && customLanguageEntries.length === 0 && searchTerm && (
               <div className="px-4 py-2 text-sm opacity-50" style={{ color: 'var(--foreground)' }}>
                 No languages found
               </div>

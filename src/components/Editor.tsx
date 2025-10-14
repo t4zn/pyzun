@@ -146,6 +146,45 @@ export default function CodeEditor({
       }
     });
 
+    // Set up language configuration for better editing experience
+    monaco.languages.setLanguageConfiguration(customLanguageId, {
+      comments: {
+        lineComment: '#',
+        blockComment: ['"""', '"""']
+      },
+      brackets: [
+        ['{', '}'],
+        ['[', ']'],
+        ['(', ')']
+      ],
+      autoClosingPairs: [
+        { open: '{', close: '}' },
+        { open: '[', close: ']' },
+        { open: '(', close: ')' },
+        { open: '"', close: '"', notIn: ['string'] },
+        { open: "'", close: "'", notIn: ['string', 'comment'] }
+      ],
+      surroundingPairs: [
+        { open: '{', close: '}' },
+        { open: '[', close: ']' },
+        { open: '(', close: ')' },
+        { open: '"', close: '"' },
+        { open: "'", close: "'" }
+      ],
+      onEnterRules: [
+        {
+          // Auto-indent after semicolon
+          beforeText: /.*;$/,
+          action: { indentAction: monaco.languages.IndentAction.None, appendText: '\n' }
+        },
+        {
+          // Auto-indent after colon (for if, for, def, etc.)
+          beforeText: /.*:$/,
+          action: { indentAction: monaco.languages.IndentAction.Indent }
+        }
+      ]
+    });
+
     // Apply the custom language to the current model
     if (editorRef.current) {
       const model = editorRef.current.getModel();
@@ -302,6 +341,26 @@ export default function CodeEditor({
           // Force suggestions to show on Ctrl+Space
           editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Space, () => {
             editor.trigger('keyboard', 'editor.action.triggerParameterHints', {});
+          });
+
+          // Add semicolon auto-formatting for custom languages
+          editor.onKeyDown((e) => {
+            if (e.keyCode === monaco.KeyCode.Semicolon && CustomLanguageService.isCustomLanguage(language)) {
+              // Let the semicolon be typed first
+              setTimeout(() => {
+                const position = editor.getPosition();
+                if (position) {
+                  const model = editor.getModel();
+                  if (model) {
+                    const lineContent = model.getLineContent(position.lineNumber);
+                    // If line ends with semicolon and cursor is at the end
+                    if (lineContent.trim().endsWith(';') && position.column === lineContent.length + 1) {
+                      editor.trigger('keyboard', 'type', { text: '\n' });
+                    }
+                  }
+                }
+              }, 0);
+            }
           });
         }}
         theme={
