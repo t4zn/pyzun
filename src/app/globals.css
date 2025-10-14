@@ -465,9 +465,22 @@ html {
   width: 0 !important;
 }
 
-/* Hide resizer/divider elements that might create vertical lines */
-.cursor-col-resize {
+/* Hide resizer/divider elements that might create vertical lines, but not our custom resize handle */
+.cursor-col-resize:not(.resize-handle-visible) {
   display: none !important;
+}
+
+/* Ensure our resize handle is always visible */
+.resize-handle-visible {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+}
+
+.resize-handle-visible:hover .flex-col {
+  opacity: 0.8 !important;
 }
 
 /* Hide any resizer dots or indicators */

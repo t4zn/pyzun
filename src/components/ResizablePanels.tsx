@@ -86,31 +86,56 @@ export default function ResizablePanels({
 
       {/* Resizer */}
       <div
-        className="w-4 sm:w-6 cursor-col-resize flex-shrink-0 group flex items-center justify-center touch-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+        className="resize-handle-visible flex-shrink-0 group flex items-center justify-center touch-none transition-all duration-200"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        style={{ backgroundColor: isDragging ? 'rgba(59, 130, 246, 0.1)' : 'transparent' }}
+        style={{ 
+          width: '16px',
+          cursor: 'col-resize',
+          minHeight: '100%',
+          display: 'flex !important',
+          visibility: 'visible !important',
+          opacity: '1 !important',
+          backgroundColor: 'transparent'
+        }}
       >
-        <div className="flex flex-col gap-1 opacity-40 group-hover:opacity-70 transition-opacity duration-200">
+        <div 
+          className="flex flex-col gap-1 transition-opacity duration-200"
+          style={{
+            opacity: isDragging ? 1 : 0.4
+          }}
+        >
           <div 
-            className="w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--foreground)' }}
+            style={{
+              width: '5px',
+              height: '5px',
+              backgroundColor: 'var(--foreground)',
+              borderRadius: '50%'
+            }}
           />
           <div 
-            className="w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--foreground)' }}
+            style={{
+              width: '5px',
+              height: '5px',
+              backgroundColor: 'var(--foreground)',
+              borderRadius: '50%'
+            }}
           />
           <div 
-            className="w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--foreground)' }}
+            style={{
+              width: '5px',
+              height: '5px',
+              backgroundColor: 'var(--foreground)',
+              borderRadius: '50%'
+            }}
           />
           <div 
-            className="w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--foreground)' }}
-          />
-          <div 
-            className="w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--foreground)' }}
+            style={{
+              width: '5px',
+              height: '5px',
+              backgroundColor: 'var(--foreground)',
+              borderRadius: '50%'
+            }}
           />
         </div>
       </div>
